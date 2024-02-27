@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.lab.mapper.LabSysTestTypeMapper">
+
+    <resultMap type="LabSysTestType" id="LabSysTestTypeResult">
+        <result property="testTypeId" column="test_type_id"/>
+        <result property="testType" column="test_type"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+    </resultMap>
+
+    <resultMap id="LabSysTestTypeLabSysOperatorResult" type="LabSysTestType" extends="LabSysTestTypeResult">
+        <collection property="labSysOperatorList" notNullColumn="sub_operator_id" javaType="java.util.List"
+                    resultMap="LabSysOperatorResult"/>
+    </resultMap>
+
+    <resultMap type="LabSysOperator" id="LabSysOperatorResult">
+        <result property="operatorId" column="sub_operator_id"/>
+        <result property="testTypeId" column="sub_test_type_id"/>
+        <result property="operatorName" column="sub_operator_name"/>
+        <result property="operatorFullName" column="sub_operator_full_name"/>
+        <result property="createBy" column="sub_create_by"/>
+        <result property="createTime" column="sub_create_time"/>
+        <result property="updateBy" column="sub_update_by"/>
+        <result property="updateTime" column="sub_update_time"/>
+        <result property="remark" column="sub_remark"/>
+        <result property="status" column="sub_status"/>
+    </resultMap>
+
+    <sql id="selectLabSysTestTypeVo">
+        select test_type_id, test_type, create_by, create_time, update_by, update_time, remark
+        from lab_sys_test_type
+    </sql>
+
+    <select id="selectLabSysTestTypeList" parameterType="LabSysTestType" resultMap="LabSysTestTypeResult">
+        <include refid="selectLabSysTestTypeVo"/>
+        <where>
+            <if test="testType != null  and testType != ''">and test_type = #{testType}</if>
+            <if test="params.beginCreateTime != null and params.beginCreateTime != '' and params.endCreateTime != null and params.endCreateTime != ''">
+                and create_time between #{params.beginCreateTime} and #{params.endCreateTime}
+            </if>
+        </where>
+        order by create_time desc
+    </select>
+
+    <select id="selectLabSysTestTypeByTestTypeId" parameterType="Long" resultMap="LabSysTestTypeLabSysOperatorResult">
+        select a.test_type_id,
+               a.test_type,
+               a.create_by,
+               a.create_time,
+               a.update_by,
+               a.update_time,
+               a.remark,
+               b.operator_id        as sub_operator_id,
+               b.test_type_id       as sub_test_type_id,
+               b.operator_name      as sub_operator_name,
+               b.operator_full_name as sub_operator_full_name,
+               b.create_by          as sub_create_by,
+               b.create_time        as sub_create_time,
+               b.update_by          as sub_update_by,
+               b.update_time        as sub_update_time,
+               b.remark             as sub_remark,
+               b.status             as sub_status
+        from lab_sys_test_type a
+                 left join lab_sys_operator b on b.test_type_id = a.test_type_id
+        where a.test_type_id = #{testTypeId}
+    </select>
+
+    <insert id="insertLabSysTestType" parameterType="LabSysTestType">
+        insert into lab_sys_test_type
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="testTypeId != null">test_type_id,</if>
+            <if test="testType != null">test_type,</if>
+            <if test="createBy != null">create_by,</if>
+            create_time,
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="testTypeId != null">#{testTypeId},</if>
+            <if test="testType != null">#{testType},</if>
+            <if test="createBy != null">#{createBy},</if>
+            GETDATE(),
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+        </trim>
+    </insert>
+
+    <update id="updateLabSysTestType" parameterType="LabSysTestType">
+        update lab_sys_test_type
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="testType != null">test_type = #{testType},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            update_time = GETDATE(),
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        where test_type_id = #{testTypeId}
+    </update>
+
+    <delete id="deleteLabSysTestTypeByTestTypeId" parameterType="Long">
+        delete
+        from lab_sys_test_type
+        where test_type_id = #{testTypeId}
+    </delete>
+
+    <delete id="deleteLabSysTestTypeByTestTypeIds" parameterType="String">
+        delete from lab_sys_test_type where test_type_id in
+        <foreach item="testTypeId" collection="array" open="(" separator="," close=")">
+            #{testTypeId}
+        </foreach>
+    </delete>
+
+    <delete id="deleteLabSysOperatorByTestTypeIds" parameterType="String">
+        delete from lab_sys_operator where test_type_id in
+        <foreach item="testTypeId" collection="array" open="(" separator="," close=")">
+            #{testTypeId}
+        </foreach>
+    </delete>
+
+    <delete id="deleteLabSysOperatorByTestTypeId" parameterType="Long">
+        delete
+        from lab_sys_operator
+        where test_type_id = #{testTypeId}
+    </delete>
+
+    <insert id="batchLabSysOperator">
+        insert into lab_sys_operator( test_type_id, operator_name, operator_full_name, create_by,
+        create_time, update_by, update_time, remark) values
+        <foreach item="item" index="index" collection="list" separator=",">
+            ( #{item.testTypeId}, #{item.operatorName}, #{item.operatorFullName}, #{item.createBy},
+            GETDATE(), #{item.updateBy}, #{item.updateTime}, #{item.remark})
+        </foreach>
+    </insert>
+
+    <select id="getLabSysTestMaxTestTypeId" resultType="Integer">
+        select MAX(test_type_id) as testTypeIdMax
+        from [dbo].[lab_sys_test_type]
+    </select>
+
+    <select id="selectLabSysTestTypeOperatorList" parameterType="LabSysTestOperSearchDto"
+            resultMap="LabSysTestTypeLabSysOperatorResult">
+        select a.test_type_id,
+        a.test_type,
+        a.create_by,
+        a.create_time,
+        a.update_by,
+        a.update_time,
+        a.remark,
+        b.operator_id as sub_operator_id,
+        b.test_type_id as sub_test_type_id,
+        b.operator_name as sub_operator_name,
+        b.operator_full_name as sub_operator_full_name,
+        b.create_by as sub_create_by,
+        b.create_time as sub_create_time,
+        b.update_by as sub_update_by,
+        b.update_time as sub_update_time,
+        b.remark as sub_remark,
+        b.status as sub_status
+        from lab_sys_test_type a
+        left join lab_sys_operator b on b.test_type_id = a.test_type_id
+        <where>
+            <if test="testType != null">and a.test_type like concat('%', #{testType}, '%')</if>
+            <if test="operatorName != null">and b.operator_name like concat('%', #{operatorName}, '%')</if>
+            <if test="operatorFullName != null">and b.operator_full_name like concat('%', #{operatorFullName}, '%')</if>
+            <if test="params.beginCreateTime != null and params.beginCreateTime != '' and params.endCreateTime != null and params.endCreateTime != ''">
+                and create_time between #{params.beginCreateTime} and #{params.endCreateTime}
+            </if>
+        </where>
+        order by a.create_time desc
+    </select>
+
+    <select id="selectAllTestType" resultType="String" parameterType="String">
+        select distinct test_type
+        from lab_sys_test_type
+        where test_type like concat('%', #{testType}, '%')
+        order by test_type
+    </select>
+</mapper>

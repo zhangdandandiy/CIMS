@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.packing.mapper.PackSysModelMapper">
+
+    <resultMap type="PackSysModel" id="PackSysModelResult">
+        <result property="modelId" column="model_id"/>
+        <result property="modelName" column="model_name"/>
+        <result property="PN" column="PN"/>
+        <result property="productName" column="product_name"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+    </resultMap>
+
+    <sql id="selectPackSysModelVo">
+        select model_id,
+               model_name,
+               PN,
+               product_name,
+               create_by,
+               create_time,
+               update_by,
+               update_time,
+               remark
+        from pack_sys_model
+    </sql>
+
+    <insert id="insertPackSysModel" parameterType="PackSysModel">
+        insert into pack_sys_model
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="modelName != null">model_name,</if>
+            <if test="PN != null">PN,</if>
+            <if test="productName != null">product_name,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="modelName != null">#{modelName},</if>
+            <if test="PN != null">#{PN},</if>
+            <if test="productName != null">#{productName},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+        </trim>
+    </insert>
+
+    <select id="selectAllPackSysModel" resultType="String">
+        select distinct model_name
+        from pack_sys_model
+    </select>
+
+    <select id="selectPackSysModelByModelName" parameterType="String" resultMap="PackSysModelResult">
+        <include refid="selectPackSysModelVo"/>
+        where model_name = #{modelName}
+    </select>
+
+</mapper>

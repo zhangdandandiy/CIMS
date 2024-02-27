@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.lab.mapper.LabSysOperatorMapper">
+
+    <resultMap type="LabSysOperator" id="LabSysOperatorResult">
+        <result property="operatorId" column="operator_id"/>
+        <result property="testTypeId" column="test_type_id"/>
+        <result property="operatorName" column="operator_name"/>
+        <result property="operatorFullName" column="operator_full_name"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+        <result property="status" column="status"/>
+    </resultMap>
+
+    <sql id="selectLabSysOperatorVo">
+        select operator_id,
+               test_type_id,
+               operator_name,
+               operator_full_name,
+               create_by,
+               create_time,
+               update_by,
+               update_time,
+               remark,
+               status
+        from lab_sys_operator
+    </sql>
+
+    <select id="selectLabSysOperatorList" parameterType="LabSysOperator" resultMap="LabSysOperatorResult">
+        <include refid="selectLabSysOperatorVo"/>
+        <where>
+            <if test="operatorId != null ">and operator_id = #{operatorId}</if>
+            <if test="testTypeId != null ">and test_type_id = #{testTypeId}</if>
+            <if test="operatorName != null  and operatorName != ''">and operator_name like concat('%', #{operatorName},
+                '%')
+            </if>
+            <if test="operatorFullName != null  and operatorFullName != ''">and operator_full_name like concat('%',
+                #{operatorFullName}, '%')
+            </if>
+        </where>
+        order by create_time desc
+    </select>
+
+    <select id="selectLabSysOperatorByOperatorId" parameterType="Long" resultMap="LabSysOperatorResult">
+        <include refid="selectLabSysOperatorVo"/>
+        where operator_id = #{operatorId}
+    </select>
+
+    <insert id="insertLabSysOperator" parameterType="LabSysOperator">
+        insert into lab_sys_operator
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="testTypeId != null">test_type_id,</if>
+            <if test="operatorName != null">operator_name,</if>
+            <if test="operatorFullName != null">operator_full_name,</if>
+            <if test="createBy != null">create_by,</if>
+            create_time,
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+            <if test="status != null">status,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="testTypeId != null">#{testTypeId},</if>
+            <if test="operatorName != null">#{operatorName},</if>
+            <if test="operatorFullName != null">#{operatorFullName},</if>
+            <if test="createBy != null">#{createBy},</if>
+            GETDATE(),
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="status != null">#{status}</if>
+        </trim>
+    </insert>
+
+    <update id="updateLabSysOperator" parameterType="LabSysOperator">
+        update lab_sys_operator
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="testTypeId != null">test_type_id = #{testTypeId},</if>
+            <if test="operatorName != null">operator_name = #{operatorName},</if>
+            <if test="operatorFullName != null">operator_full_name = #{operatorFullName},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            update_time = GETDATE(),
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="status != null">status = #{status}</if>
+        </trim>
+        where operator_id = #{operatorId}
+    </update>
+
+    <delete id="deleteLabSysOperatorByOperatorId" parameterType="Long">
+        delete
+        from lab_sys_operator
+        where operator_id = #{operatorId}
+    </delete>
+
+    <delete id="deleteLabSysOperatorByOperatorIds" parameterType="String">
+        delete from lab_sys_operator where operator_id in
+        <foreach item="operatorId" collection="array" open="(" separator="," close=")">
+            #{operatorId}
+        </foreach>
+    </delete>
+
+    <select id="searchAllOperator" resultType="String" parameterType="String">
+        select operator_full_name + ' ' +operator_name as operator
+        from lab_sys_operator
+        where test_type_id in
+        (
+        select test_type_id
+        from lab_sys_test_type
+        <where>
+            <if test="testType != null">test_type=#{testType}</if>
+        </where>
+        )
+    </select>
+</mapper>

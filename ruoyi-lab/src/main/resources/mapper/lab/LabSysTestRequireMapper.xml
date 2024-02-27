@@ -1,0 +1,770 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.lab.mapper.LabSysTestRequireMapper">
+
+    <resultMap type="LabSysTestRequire" id="LabSysTestGroupResult">
+        <result property="testGroupId" column="test_group_id"/>
+        <result property="product" column="product"/>
+        <result property="stage" column="stage"/>
+        <result property="mileage" column="mileage"/>
+        <result property="testOrderNumber" column="test_order_number"/>
+        <result property="groups" column="groups"/>
+        <result property="groupFile" column="group_file"/>
+        <result property="groupNoCompletedMergeFile" column="group_no_completed_merge_file"/>
+        <result property="groupMergeFile" column="group_merge_file"/>
+        <result property="groupMergeBzFile" column="group_merge_bz_file"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+        <result property="uploadBy" column="upload_by"/>
+        <result property="uploadTime" column="upload_time"/>
+    </resultMap>
+
+    <resultMap id="LabSysTestGroupLabSysTestItemResult" type="LabSysTestRequire" extends="LabSysTestGroupResult">
+        <collection property="labSysTestItemList" notNullColumn="sub_test_item_id" javaType="java.util.List"
+                    resultMap="LabSysTestItemResult"/>
+    </resultMap>
+
+    <resultMap id="LabSysPlanContentItemResult" type="LabSysPlanContentProductDto">
+        <result property="product" column="product"/>
+        <collection property="children" ofType="LabSysPlanContentStageDto">
+            <result property="stage" column="stage"/>
+            <collection property="children" ofType="LabSysPlanContentMileageDto">
+                <result property="mileage" column="mileage"/>
+                <collection property="children" ofType="LabSysPlanContentGroupDto">
+                    <result property="groups" column="groups"/>
+                    <result property="testOrderNumber" column="test_order_number"/>
+                    <result property="groupFile" column="group_file"/>
+                    <result property="groupNoCompletedMergeFile" column="group_no_completed_merge_file"/>
+                    <result property="groupMergeFile" column="group_merge_file"/>
+                    <result property="groupMergeBzFile" column="group_merge_bz_file"/>
+                    <result property="testGroupId" column="test_group_id"/>
+                    <collection property="children" ofType="LabSysTestItem">
+                        <result property="testItemId" column="test_item_id"/>
+                        <result property="testGroupId" column="test_group_id"/>
+                        <result property="test" column="test"/>
+                        <result property="cycles" column="cycles"/>
+                        <result property="testItemDescription" column="test_item_description"/>
+                        <result property="testCondition" column="test_condition"/>
+                        <result property="testStandard" column="test_standard"/>
+                        <result property="testType" column="test_type"/>
+                        <result property="operatorName" column="operator_name"/>
+                        <result property="testPlanTime" column="test_plan_time"/>
+                        <result property="filePath" column="file_path"/>
+                        <result property="uploadBy" column="upload_by"/>
+                        <result property="uploadTime" column="upload_time"/>
+                        <result property="uploadFlag" column="upload_flag"/>
+                        <result property="testItemResult" column="test_item_result"/>
+                        <result property="completeStatus" column="complete_status"/>
+                        <result property="testImage" column="test_image"/>
+                    </collection>
+                </collection>
+            </collection>
+        </collection>
+    </resultMap>
+
+    <resultMap type="LabSysTestItem" id="LabSysTestItemResult">
+        <result property="testItemId" column="sub_test_item_id"/>
+        <result property="testGroupId" column="sub_test_group_id"/>
+        <result property="test" column="sub_test"/>
+        <result property="cycles" column="sub_cycles"/>
+        <result property="testItemDescription" column="sub_test_item_description"/>
+        <result property="testCondition" column="sub_test_condition"/>
+        <result property="testStandard" column="sub_test_standard"/>
+        <result property="testType" column="sub_test_type"/>
+        <result property="operatorName" column="sub_operator_name"/>
+        <result property="testPlanTime" column="sub_test_plan_time"/>
+        <result property="filePath" column="sub_file_path"/>
+        <result property="uploadBy" column="sub_upload_by"/>
+        <result property="uploadTime" column="sub_upload_time"/>
+        <result property="uploadFlag" column="sub_upload_flag"/>
+        <result property="testItemResult" column="sub_test_item_result"/>
+        <result property="completeStatus" column="sub_complete_status"/>
+        <result property="testImage" column="sub_test_image"/>
+    </resultMap>
+
+    <resultMap id="LabSysPlanContentResult" type="LabSysPlanContentResultDto">
+        <result property="product" column="product"/>
+        <result property="stage" column="stage"/>
+        <result property="mileage" column="mileage"/>
+        <result property="testOrderNumber" column="test_order_number"/>
+        <result property="groups" column="groups"/>
+        <result property="test" column="test"/>
+        <result property="cycles" column="cycles"/>
+        <result property="testItemDescription" column="test_item_description"/>
+        <result property="testCondition" column="test_condition"/>
+        <result property="testStandard" column="test_standard"/>
+        <result property="testImage" column="test_image"/>
+        <result property="testType" column="test_type"/>
+        <result property="operatorName" column="operator_name"/>
+        <result property="testPlanTime" column="test_plan_time"/>
+    </resultMap>
+
+    <sql id="selectLabSysTestGroupVo">
+        select test_group_id,
+               product,
+               stage,
+               mileage,
+               test_order_number,
+               groups,
+               group_file,
+               group_no_completed_merge_file,
+               group_merge_file,
+               group_merge_bz_file,
+               create_by,
+               create_time,
+               update_by,
+               update_time,
+               remark,
+               upload_by,
+               upload_time
+        from lab_sys_test_group
+    </sql>
+
+    <select id="selectLabSysTestRequire" parameterType="LabSysTestRequire" resultMap="LabSysTestGroupResult">
+        <include refid="selectLabSysTestGroupVo"/>
+        <where>
+            <if test="product != null  and product != ''">and product = #{product}</if>
+            <if test="stage != null  and stage != ''">and stage = #{stage}</if>
+            <if test="mileage != null  and mileage != ''">and mileage = #{mileage}</if>
+            <if test="testOrderNumber != null  and testOrderNumber != ''">and test_order_number = #{testOrderNumber}
+            </if>
+            <if test="groups != null  and groups != ''">and groups = #{groups}</if>
+            <if test="groupFile != null and groupFile != ''">and group_file = #{groupFile}</if>
+            <if test="groupNoCompletedMergeFile != null  and groupNoCompletedMergeFile != ''">and
+                group_no_completed_merge_file = #{groupNoCompletedMergeFile}
+            </if>
+            <if test="groupMergeFile != null  and groupMergeFile != ''">and group_merge_file = #{groupMergeFile}</if>
+            <if test="groupMergeBzFile != null  and groupMergeBzFile != ''">and group_merge_bz_file =
+                #{groupMergeBzFile}
+            </if>
+            <if test="params.beginCreateTime != null and params.beginCreateTime != '' and params.endCreateTime != null and params.endCreateTime != ''">
+                and create_time between #{params.beginCreateTime} and #{params.endCreateTime}
+            </if>
+        </where>
+        order by create_time desc
+    </select>
+
+    <!-- 查询group列表 -->
+    <select id="selectLabSysTestGroupList" parameterType="LabSysPlanContentSearchDto"
+            resultMap="LabSysPlanContentItemResult">
+        select a.product,
+        a.stage,
+        a.mileage,
+        a.test_order_number,
+        a.groups,
+        a.create_by,
+        a.create_time,
+        a.update_time,
+        a.remark,
+        a.group_file,
+        a.group_no_completed_merge_file,
+        a.group_merge_file,
+        a.group_merge_bz_file,
+        a.test_group_id,
+        b.test_item_id,
+        b.test,
+        b.cycles,
+        b.test_item_description,
+        b.test_condition,
+        b.test_standard,
+        b.test_type,
+        b.operator_name,
+        b.test_plan_time,
+        b.file_path,
+        b.upload_by,
+        b.upload_time,
+        b.upload_flag,
+        b.test_image,
+        b.test_item_result
+        from(
+        select * from lab_sys_test_group
+        <where>
+            <if test="product != null  and product != ''">and product = #{product}</if>
+            <if test="stage != null  and stage != ''">and stage = #{stage}</if>
+            <if test="mileage != null  and mileage != ''">and mileage = #{mileage}</if>
+            <if test="testOrderNumber != null  and testOrderNumber != ''">and test_order_number like concat('%',
+                #{testOrderNumber}, '%')
+            </if>
+            <if test="groups != null  and groups != ''">and groups = #{groups}</if>
+            <if test="params.beginCreateTime != null and params.beginCreateTime != '' and params.endCreateTime != null and params.endCreateTime != ''">
+                and create_time between #{params.beginCreateTime} and #{params.endCreateTime}
+            </if>
+        </where>
+        ) a
+        left join
+        (select * from lab_sys_test_item) b
+        on a.test_group_id=b.test_group_id
+        order by a.create_time desc
+    </select>
+
+    <!-- 查询group列表 -->
+    <select id="selectLabSysTestGroupListByName" parameterType="LabSysPlanContentSearchDto"
+            resultMap="LabSysTestGroupLabSysTestItemResult">
+        select a.test_group_id,
+        a.product,
+        a.stage,
+        a.mileage,
+        a.test_order_number,
+        a.groups,
+        a.group_file,
+        a.group_no_completed_merge_file,
+        a.group_merge_file,
+        a.group_merge_bz_file,
+        a.create_by,
+        a.create_time,
+        a.update_by,
+        a.update_time,
+        a.remark,
+        a.group_file,
+        a.upload_time,
+        a.upload_by,
+        b.test_item_id as sub_test_item_id,
+        b.test_group_id as sub_test_group_id,
+        b.test as sub_test,
+        b.cycles as sub_cycles,
+        b.test_item_description as sub_test_item_description,
+        b.test_condition as sub_test_condition,
+        b.test_standard as sub_test_standard,
+        b.test_type as sub_test_type,
+        b.operator_name as sub_operator_name,
+        b.test_plan_time as sub_test_plan_time,
+        b.file_path as sub_file_path,
+        b.upload_by as sub_upload_by,
+        b.upload_time as sub_upload_time,
+        b.test_image as sub_test_image,
+        b.upload_flag as sub_upload_flag,
+        b.test_item_result as sub_test_item_result,
+        b.complete_status as sub_complete_status
+        from lab_sys_test_group a
+        left join lab_sys_test_item b on b.test_group_id = a.test_group_id
+        <where>
+            <if test="testGroupId != null and testGroupId != ''">a.test_group_id = #{testGroupId}</if>
+            <if test="product != null  and product != ''">and a.product = #{product}</if>
+            <if test="stage != null  and stage != ''">and a.stage = #{stage}</if>
+            <if test="mileage != null  and mileage != ''">and a.mileage = #{mileage}</if>
+            <if test="testOrderNumber != null  and testOrderNumber != ''">and a.test_order_number like concat('%',
+                #{testOrderNumber}, '%')
+            </if>
+            <if test="groups != null  and groups != ''">and a.groups = #{groups}</if>
+            <if test="params.beginCreateTime != null and params.beginCreateTime != '' and params.endCreateTime != null and params.endCreateTime != ''">
+                and a.create_time between #{params.beginCreateTime} and #{params.endCreateTime}
+            </if>
+        </where>
+    </select>
+
+    <!-- 通过groupId查询group -->
+    <select id="selectLabSysTestGroupByTestGroupId" parameterType="Long"
+            resultMap="LabSysTestGroupLabSysTestItemResult">
+        select a.test_group_id,
+               a.product,
+               a.stage,
+               a.mileage,
+               a.test_order_number,
+               a.groups,
+               a.group_file,
+               a.group_no_completed_merge_file,
+               a.group_merge_file,
+               a.group_merge_bz_file,
+               a.create_by,
+               a.create_time,
+               a.update_by,
+               a.update_time,
+               a.remark,
+               a.group_file,
+               a.upload_time,
+               a.upload_by,
+               b.test_item_id          as sub_test_item_id,
+               b.test_group_id         as sub_test_group_id,
+               b.test                  as sub_test,
+               b.cycles                as sub_cycles,
+               b.test_item_description as sub_test_item_description,
+               b.test_condition        as sub_test_condition,
+               b.test_standard         as sub_test_standard,
+               b.test_type             as sub_test_type,
+               b.operator_name         as sub_operator_name,
+               b.test_plan_time        as sub_test_plan_time,
+               b.file_path             as sub_file_path,
+               b.upload_by             as sub_upload_by,
+               b.upload_time           as sub_upload_time,
+               b.test_image            as sub_test_image,
+               b.upload_flag           as sub_upload_flag,
+               b.test_item_result      as sub_test_item_result,
+               b.complete_status       as sub_complete_status
+        from lab_sys_test_group a
+                 left join lab_sys_test_item b on b.test_group_id = a.test_group_id
+        where a.test_group_id = #{testGroupId}
+    </select>
+
+    <!-- 通过testItemId查询测试详细信息 -->
+    <select id="selectLabSysTestItemByTestItemId" parameterType="Long" resultType="LabSysTestItem">
+        select *
+        from lab_sys_test_item
+        where test_item_id = #{testItemId}
+    </select>
+
+    <!-- 查询测试结果 -->
+    <select id="searchLabSysTestItemResult" parameterType="LabSysPlanContentSearchDto"
+            resultType="LabSysPlanContentResultItemDto">
+        select b.test_item_id,
+        a.test_order_number,
+        a.groups,
+        b.test,
+        b.cycles,
+        b.test_item_description,
+        b.test_condition,
+        b.test_standard,
+        b.test_type,
+        b.operator_name,
+        b.test_plan_time,
+        b.file_path,
+        b.upload_by,
+        b.upload_time,
+        b.upload_flag,
+        b.test_image,
+        b.test_item_result,
+        b.complete_status
+        from (
+        select test_group_id,
+        product,
+        stage,
+        mileage,
+        test_order_number,
+        groups
+        from lab_sys_test_group
+        <where>
+            <if test="product != null and product != ''">and product=#{product}</if>
+            <if test="stage != null and stage != ''">and stage=#{stage}</if>
+            <if test="mileage != null and mileage != ''">and mileage=#{mileage}</if>
+            <if test="groups != null and groups != ''">and groups=#{groups}</if>
+        </where>
+        ) a
+        left join (
+        select test_item_id,
+        test_group_id,
+        test,
+        cycles,
+        test_item_description,
+        test_condition,
+        test_standard,
+        test_type,
+        operator_name,
+        test_plan_time,
+        file_path,
+        upload_by,
+        upload_time,
+        upload_flag,
+        test_image,
+        test_item_result,
+        complete_status
+        from lab_sys_test_item
+        ) b
+        on a.test_group_id = b.test_group_id
+    </select>
+
+    <!-- 查询group测试结果 -->
+    <select id="searchLabSysTestGroupResultList" parameterType="LabSysPlanContentSearchDto"
+            resultType="LabSysPlanContentResultGroupDto">
+        SELECT a.test_group_id,
+        a.product,
+        a.stage,
+        a.mileage,
+        a.groups,
+        a.group_merge_bz_file,
+        max(b.test_plan_time) AS test_plan_time,
+        CASE WHEN c.all_num != d.com_num THEN '0' WHEN ISNULL(d.com_num, 0) = 0 THEN '0' ELSE '1' END AS status,
+        CASE WHEN (c.all_num-d.com_num)!=c.all_num THEN '1' ELSE '0' END AS result
+        FROM (
+        SELECT test_group_id,
+        product,
+        stage,
+        mileage,
+        test_order_number,
+        groups,
+        group_merge_bz_file
+        FROM lab_sys_test_group
+        <where>
+            <if test="product != null and product != ''">and product=#{product}</if>
+            <if test="stage != null and stage != ''">and stage=#{stage}</if>
+            <if test="mileage != null and mileage != ''">and mileage=#{mileage}</if>
+            <if test="testGroupId != null and testGroupId != ''">and test_group_id=#{testGroupId}</if>
+        </where>
+        ) a
+        LEFT JOIN (
+        SELECT test_group_id, test_plan_time
+        FROM lab_sys_test_item
+        ) b ON a.test_group_id = b.test_group_id
+        LEFT JOIN (
+        --总数量
+        SELECT test_group_id, ISNULL(count(*), 0) AS all_num
+        FROM lab_sys_test_item WHERE upload_flag=1
+        GROUP BY test_group_id
+        ) c ON a.test_group_id = c.test_group_id
+        LEFT JOIN (
+        --已完成数量
+        SELECT test_group_id, ISNULL(count(*), 0) AS com_num
+        FROM lab_sys_test_item
+        WHERE complete_status not in ('0') and upload_flag=1
+        GROUP BY test_group_id
+        ) d ON a.test_group_id = d.test_group_id
+        GROUP BY a.test_group_id, a.product, a.stage, a.mileage, a.groups, a.group_merge_bz_file,c.all_num, d.com_num;
+    </select>
+
+    <!-- 获取group测试项的完成状态(0：未完成 1：已完成) -->
+    <select id="getLabSysTestGroupResult" parameterType="Long" resultType="int">
+        SELECT CASE WHEN c.all_num != d.com_num THEN '0' WHEN ISNULL(d.com_num, 0) = 0 THEN '0' ELSE '1' END AS status
+        FROM (
+                 SELECT test_group_id,
+                        product,
+                        stage,
+                        mileage,
+                        test_order_number,
+                        groups
+                 FROM lab_sys_test_group
+                 where test_group_id = #{testGroupId}
+             ) a
+                 LEFT JOIN (
+            SELECT test_group_id, test_plan_time
+            FROM lab_sys_test_item
+        ) b ON a.test_group_id = b.test_group_id
+                 LEFT JOIN (
+            --总数量
+            SELECT test_group_id, ISNULL(count(*), 0) AS all_num
+            FROM lab_sys_test_item
+            where upload_flag = 1
+            GROUP BY test_group_id
+        ) c ON a.test_group_id = c.test_group_id
+                 LEFT JOIN (
+            --已完成数量
+            SELECT test_group_id, ISNULL(count(*), 0) AS com_num
+            FROM lab_sys_test_item
+            WHERE complete_status not in ('0')
+              and upload_flag = 1
+            GROUP BY test_group_id
+        ) d ON a.test_group_id = d.test_group_id
+        GROUP BY a.test_group_id, a.product, a.stage, a.mileage, a.groups, c.all_num, d.com_num;
+    </select>
+
+    <!-- 新增group -->
+    <insert id="insertLabSysTestGroup" parameterType="LabSysTestRequire">
+        insert into lab_sys_test_group
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="testGroupId != null">test_group_id,</if>
+            <if test="product != null">product,</if>
+            <if test="stage != null">stage,</if>
+            <if test="mileage != null">mileage,</if>
+            <if test="testOrderNumber != null">test_order_number,</if>
+            <if test="groups != null">groups,</if>
+            <if test="groupFile != null">group_file,</if>
+            <if test="groupNoCompletedMergeFile != null">group_no_completed_merge_file,</if>
+            <if test="groupMergeFile != null">group_merge_file,</if>
+            <if test="groupMergeBzFile != null">group_merge_bz_file,</if>
+            <if test="createBy != null">create_by,</if>
+            create_time,
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+            <if test="uploadTime != null">upload_time,</if>
+            <if test="uploadBy != null">upload_by,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="testGroupId != null">#{testGroupId},</if>
+            <if test="product != null">#{product},</if>
+            <if test="stage != null">#{stage},</if>
+            <if test="mileage != null">#{mileage},</if>
+            <if test="testOrderNumber != null">#{testOrderNumber},</if>
+            <if test="groups != null">#{groups},</if>
+            <if test="groupFile != null">#{groupFile},</if>
+            <if test="groupNoCompletedMergeFile != null">#{groupNoCompletedMergeFile},</if>
+            <if test="groupMergeFile != null">#{groupMergeFile},</if>
+            <if test="groupMergeBzFile != null">#{groupMergeBzFile},</if>
+            <if test="createBy != null">#{createBy},</if>
+            GETDATE(),
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="uploadTime != null">#{uploadTime},</if>
+            <if test="uploadBy != null">#{uploadBy},</if>
+        </trim>
+    </insert>
+
+    <!-- 修改group -->
+    <update id="updateLabSysTestGroup" parameterType="LabSysTestRequire">
+        update lab_sys_test_group
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="product != null">product = #{product},</if>
+            <if test="stage != null">stage = #{stage},</if>
+            <if test="mileage != null">mileage = #{mileage},</if>
+            <if test="testOrderNumber != null">test_order_number = #{testOrderNumber},</if>
+            <if test="groups != null">groups = #{groups},</if>
+            <if test="groupFile != null">group_file = #{groupFile},</if>
+            <if test="groupNoCompletedMergeFile != null">group_no_completed_merge_file = #{groupNoCompletedMergeFile},
+            </if>
+            <if test="groupMergeFile != null">group_merge_file = #{groupMergeFile},</if>
+            <if test="groupMergeBzFile != null">group_merge_bz_file = #{groupMergeBzFile},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            update_time = GETDATE(),
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="uploadTime != null">upload_time = #{uploadTime},</if>
+            <if test="uploadBy != null">upload_by = #{uploadBy},</if>
+        </trim>
+        where test_group_id = #{testGroupId}
+    </update>
+
+    <update id="updateLabSysTestGroupFilePath" parameterType="Long">
+        update lab_sys_test_group
+        set group_no_completed_merge_file = null,
+            group_merge_file              = null,
+            update_time                   = GETDATE()
+        where test_group_id = #{testGroupId}
+    </update>
+
+    <!-- 修改Item -->
+    <update id="updateLabSysTestItem" parameterType="LabSysTestItem">
+        update lab_sys_test_item
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="test != null">test = #{test},</if>
+            <if test="cycles != null">cycles = #{cycles},</if>
+            <if test="testItemDescription != null">test_item_description = #{testItemDescription},</if>
+            <if test="testCondition != null">test_condition = #{testCondition},</if>
+            <if test="testStandard != null">test_standard = #{testStandard},</if>
+            <if test="testType != null">test_type = #{testType},</if>
+            <if test="operatorName != null">operator_name = #{operatorName},</if>
+            <if test="testPlanTime != null">test_plan_time = #{testPlanTime},</if>
+            <if test="filePath != null">file_path = #{filePath},</if>
+            <if test="uploadBy != null">upload_by = #{uploadBy},</if>
+            <if test="uploadFlag != null">upload_flag = #{uploadFlag},</if>
+            <if test="testImage != null">test_image = #{testImage},</if>
+            upload_time = GETDATE(),
+            <if test="testItemResult != null">test_item_result = #{testItemResult},</if>
+            <if test="completeStatus != null">complete_status = #{completeStatus},</if>
+        </trim>
+        where test_item_id = #{testItemId}
+    </update>
+
+    <!-- 通过groupId删除group -->
+    <delete id="deleteLabSysTestGroupByTestGroupId" parameterType="Long">
+        delete
+        from lab_sys_test_group
+        where test_group_id = #{testGroupId}
+    </delete>
+
+    <delete id="deleteLabSysTestItemByTestItemIds" parameterType="String">
+        delete from lab_sys_test_item where test_item_id in
+        <foreach item="testItemId" collection="array" open="(" separator="," close=")">
+            #{testItemId}
+        </foreach>
+    </delete>
+
+    <!-- 批量删除group -->
+    <delete id="deleteLabSysTestGroupByTestGroupIds" parameterType="String">
+        delete from lab_sys_test_group where test_group_id in
+        <foreach item="testGroupId" collection="array" open="(" separator="," close=")">
+            #{testGroupId}
+        </foreach>
+    </delete>
+
+    <!-- 根据testGroupIds查询测试项目列表 -->
+    <select id="LabSysTestItemByTestGroupIds" parameterType="String" resultMap="LabSysTestItemResult">
+        select test_item_id as sub_test_item_id,
+        test_group_id as sub_test_group_id,
+        test as sub_test,
+        cycles as sub_cycles,
+        test_item_description as sub_test_item_description,
+        test_condition as sub_test_condition,
+        test_standard as sub_test_standard,
+        test_type as sub_test_type,
+        operator_name as sub_operator_name,
+        test_plan_time as sub_test_plan_time,
+        file_path as sub_file_path,
+        upload_by as sub_upload_by,
+        upload_time as sub_upload_time,
+        upload_flag as sub_upload_flag,
+        test_image as sub_test_image,
+        test_item_result as sub_test_item_result,
+        complete_status as sub_complete_status
+        from lab_sys_test_item where test_group_id in
+        <foreach item="testGroupId" collection="array" open="(" separator="," close=")">
+            #{testGroupId}
+        </foreach>
+    </select>
+
+    <!-- 批量删除测试项目详细信息数据 -->
+    <delete id="deleteLabSysTestItemByTestGroupIds" parameterType="String">
+        delete from lab_sys_test_item where test_group_id in
+        <foreach item="testGroupId" collection="array" open="(" separator="," close=")">
+            #{testGroupId}
+        </foreach>
+    </delete>
+
+    <!-- 通过group主键删除测试项目详细信息数据信息 -->
+    <delete id="deleteLabSysTestItemByTestGroupId" parameterType="Long">
+        delete
+        from lab_sys_test_item
+        where test_group_id = #{testGroupId}
+    </delete>
+
+    <!-- 批量新增测试项目详细信息数据 -->
+    <insert id="batchLabSysTestItem">
+        insert into lab_sys_test_item( test_group_id, test, cycles ,test_item_description, test_condition,
+        test_standard, test_type, operator_name, test_plan_time, file_path, upload_by, upload_time,
+        upload_flag,test_item_result,test_image,
+        complete_status) values
+        <foreach item="item" index="index" collection="list" separator=",">
+            ( #{item.testGroupId}, #{item.test}, #{item.cycles},#{item.testItemDescription},
+            #{item.testCondition}, #{item.testStandard}, #{item.testType}, #{item.operatorName}, #{item.testPlanTime},
+            #{item.filePath}, #{item.uploadBy},CASE WHEN #{item.uploadTime} IS NULL THEN NULL ELSE CONVERT(datetime,
+            #{item.uploadTime}, 120) END, #{item.uploadFlag},#{item.testItemResult},#{item.testImage},
+            #{item.completeStatus})
+        </foreach>
+    </insert>
+
+    <!-- 上传测试文件 -->
+    <update id="updateTestPlanFile">
+        update lab_sys_test_item
+        <set>
+            <if test="filePath != null">file_path=#{filePath},</if>
+            <if test="uploadBy != null">upload_by=#{uploadBy},</if>
+            upload_time=GETDATE(),
+            <if test="testItemResult != null">test_item_result=#{testItemResult},</if>
+            <if test="completeStatus != null">complete_status=#{completeStatus},</if>
+        </set>
+        where test_item_id=#{testItemId}
+    </update>
+
+    <!-- 上传group测试文件 -->
+    <update id="updateTestGroupFile">
+        update lab_sys_test_group
+        <set>
+            <if test="groupFile != null">group_file = #{groupFile},</if>
+            <if test="uploadBy != null">upload_by = #{uploadBy},</if>
+            upload_time=GETDATE(),
+        </set>
+        where test_group_id = #{testGroupId}
+    </update>
+
+    <!-- 保存group拼接后的文件 -->
+    <update id="updateTestMergeGroupFile">
+        update lab_sys_test_group
+        <set>
+            <if test="groupMergeFile != null">group_merge_file = #{groupMergeFile},</if>
+            <if test="uploadBy != null">upload_by = #{uploadBy},</if>
+            upload_time=GETDATE(),
+        </set>
+        where test_group_id = #{testGroupId}
+    </update>
+
+    <!-- 上传补正测试文件 -->
+    <update id="updateTestMergeBzGroupFile">
+        update lab_sys_test_group
+        <set>
+            <if test="groupMergeBzFile != null">group_merge_bz_file = #{groupMergeBzFile},</if>
+            <if test="uploadBy != null">upload_by = #{uploadBy},</if>
+            upload_time=GETDATE(),
+        </set>
+        where test_group_id = #{testGroupId}
+    </update>
+
+    <!-- 通过testGroupId获取文件路径列表 -->
+    <select id="getFilePathByGroupId" parameterType="Long" resultType="String">
+        select file_path
+        from lab_sys_test_item
+        where test_group_id = #{testGroupId}
+        order by test_item_id asc
+    </select>
+
+    <!-- 获取 lab_sys_test_group 表中最大的主键ID -->
+    <select id="getLabSysTestGroupMaxGroupId" resultType="Integer">
+        select MAX(test_group_id) as testGroupId
+        from lab_sys_test_group
+    </select>
+
+    <!-- 通过 product、stage、mileage、testOrderNumber、groups 删除 testGroup -->
+    <delete id="deleteLabSysTestGroup" parameterType="LabSysPlanContentSearchDto">
+        delete from lab_sys_test_group
+        <where>
+            <if test="product != null and product != ''">and product = #{product}</if>
+            <if test="stage != null and stage != ''">and stage = #{stage}</if>
+            <if test="mileage != null and mileage != ''">and mileage = #{mileage}</if>
+            <if test="testOrderNumber != null and testOrderNumber != ''">and test_order_number = #{testOrderNumber}</if>
+            <if test="groups != null and groups != ''">and groups = #{groups}</if>
+        </where>
+    </delete>
+
+    <!-- 通过 product、stage、mileage、testOrderNumber、groups 查到所有 Id -->
+    <select id="selectLabSysTestGroupAllId" parameterType="LabSysPlanContentSearchDto" resultType="Long">
+        select test_group_id
+        from lab_sys_test_group
+        <where>
+            <if test="product != null and product != ''">and product = #{product}</if>
+            <if test="stage != null and stage != ''">and stage = #{stage}</if>
+            <if test="mileage != null and mileage != ''">and mileage = #{mileage}</if>
+            <if test="testOrderNumber != null and testOrderNumber != ''">and test_order_number = #{testOrderNumber}</if>
+            <if test="groups != null and groups != ''">and groups = #{groups}</if>
+        </where>
+    </select>
+
+    <update id="updateLabSysTestItemResult" parameterType="LabSysTestItem">
+        update lab_sys_test_item
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="testGroupId != null">test_group_id = #{testGroupId},</if>
+            <if test="test != null">test = #{test},</if>
+            <if test="cycles != null">cycles = #{cycles},</if>
+            <if test="testItemDescription != null">test_item_description = #{testItemDescription},</if>
+            <if test="testCondition != null">test_condition = #{testCondition},</if>
+            <if test="testStandard != null">test_standard = #{testStandard},</if>
+            <if test="testType != null">test_type = #{testType},</if>
+            <if test="operatorName != null">operator_name = #{operatorName},</if>
+            <if test="testPlanTime != null">test_plan_time = #{testPlanTime},</if>
+            <if test="filePath != null">file_path = #{filePath},</if>
+            <if test="uploadBy != null">upload_by = #{uploadBy},</if>
+            <if test="uploadTime != null">upload_time = #{uploadTime},</if>
+            <if test="testImage != null">test_image = #{testImage},</if>
+            <if test="testItemResult != null">test_item_result = #{testItemResult},</if>
+            <if test="completeStatus != null">complete_status = #{completeStatus},</if>
+        </trim>
+        where test_item_id = #{testItemId}
+    </update>
+
+    <select id="checkPlanContentResultUnique" parameterType="LabSysPlanContentResultDto"
+            resultMap="LabSysPlanContentResult">
+        select g.product,
+        g.stage,
+        g.mileage,
+        g.test_order_number,
+        g.groups,
+        i.test,
+        i.cycles,
+        i.test_item_description,
+        i.test_condition,
+        i.test_standard,
+        i.test_type,
+        i.operator_name,
+        i.test_plan_time
+        from lab_sys_test_group g
+        left join lab_sys_test_item i on g.test_group_id = i.test_group_id
+        <where>
+            <if test="product != null and product != ''">and product = #{product}</if>
+            <if test="stage != null and stage != ''">and stage = #{stage}</if>
+            <if test="mileage != null and mileage != ''">and mileage = #{mileage}</if>
+            <if test="testOrderNumber != null and testOrderNumber != ''">and test_order_number = #{testOrderNumber}</if>
+            <if test="groups != null and groups != ''">and groups = #{groups}</if>
+            <if test="test != null and test != ''">and test = #{test}</if>
+            <if test="cycles != null and cycles != ''">and cycles = #{cycles}</if>
+            <if test="testItemDescription != null and testItemDescription != ''">and test_item_description =
+                #{testItemDescription}
+            </if>
+            <if test="testCondition != null and testCondition != ''">and test_condition = #{testCondition}</if>
+            <if test="testStandard != null and testStandard != ''">and test_standard = #{testStandard}</if>
+            <if test="testType != null and testType != ''">and test_type = #{testType}</if>
+            <if test="operatorName != null and operatorName != ''">and operator_name = #{operatorName}</if>
+        </where>
+    </select>
+
+</mapper>

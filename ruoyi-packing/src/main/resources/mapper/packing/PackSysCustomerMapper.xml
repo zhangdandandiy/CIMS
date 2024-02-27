@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.packing.mapper.PackSysCustomerMapper">
+
+    <resultMap type="PackSysCustomer" id="PackSysCustomerResult">
+        <result property="customerId" column="customer_id"/>
+        <result property="customerName" column="customer_name"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+    </resultMap>
+
+    <sql id="selectPackSysCustomerVo">
+        select customer_id,
+               customer_name,
+               create_by,
+               create_time,
+               update_by,
+               update_time,
+               remark
+        from pack_sys_customer
+    </sql>
+
+    <insert id="insertPackSysCustomer" parameterType="PackSysCustomer">
+        insert into pack_sys_customer
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="customerName != null">customer_name,</if>
+            <if test="createBy != null">create_by,</if>
+            create_time,
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="customerName != null">#{customerName},</if>
+            <if test="createBy != null">#{createBy},</if>
+            getdate(),
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+        </trim>
+    </insert>
+
+    <select id="selectAllPackSysCustomer" resultType="String">
+        select distinct customer_name
+        from pack_sys_customer
+    </select>
+
+</mapper>

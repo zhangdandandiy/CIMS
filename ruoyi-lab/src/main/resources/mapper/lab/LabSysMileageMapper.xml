@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.lab.mapper.LabSysMileageMapper">
+
+    <resultMap type="LabSysMileage" id="LabSysMileageResult">
+        <result property="mileageId" column="mileage_id"/>
+        <result property="mileage" column="mileage"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+    </resultMap>
+
+    <sql id="selectLabSysMileageVo">
+        select mileage_id, mileage, create_by, create_time, update_by, update_time, remark
+        from lab_sys_mileage
+    </sql>
+
+    <!-- 通过里程ID查询里程 -->
+    <select id="selectLabSysMileageByMileageId" parameterType="Long" resultMap="LabSysMileageResult">
+        <include refid="selectLabSysMileageVo"/>
+        where mileage_id = #{mileageId}
+    </select>
+
+    <!-- 通过阶段ID查询里程 -->
+    <select id="selectLabSysMileageByStageId" parameterType="Long" resultMap="LabSysMileageResult">
+        <include refid="selectLabSysMileageVo"/>
+        where stage_id = #{stageId}
+    </select>
+
+    <!-- 查询里程列表 -->
+    <select id="selectLabSysMileageList" parameterType="LabSysMileage" resultMap="LabSysMileageResult">
+        <include refid="selectLabSysMileageVo"/>
+        <where>
+            <if test="mileageId != null ">and mileage_id = #{mileageId}</if>
+            <if test="mileage != null  and mileage != ''">and mileage = #{mileage}</if>
+        </where>
+        order by create_time desc
+    </select>
+
+    <!-- 新增里程 -->
+    <insert id="insertLabSysMileage" parameterType="LabSysMileageInsertDto">
+        insert into lab_sys_mileage
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="mileageId != null">mileage_id,</if>
+            <if test="mileage != null">mileage,</if>
+            <if test="createBy != null">create_by,</if>
+            create_time,
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="mileageId != null">#{mileageId},</if>
+            <if test="mileage != null">#{mileage},</if>
+            <if test="createBy != null">#{createBy},</if>
+            GETDATE(),
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+        </trim>
+    </insert>
+
+    <!-- 修改里程 -->
+    <update id="updateLabSysMileage" parameterType="LabSysMileage">
+        update lab_sys_mileage
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="mileage != null">mileage = #{mileage},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            update_time = GETDATE(),
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        where mileage_id = #{mileageId}
+    </update>
+
+    <!-- 删除里程 -->
+    <delete id="deleteLabSysMileageByMileageId" parameterType="Long">
+        delete
+        from lab_sys_mileage
+        where mileage_id = #{mileageId}
+    </delete>
+
+    <!-- 批量删除里程 -->
+    <delete id="deleteLabSysMileageByMileageIds" parameterType="String">
+        delete from lab_sys_mileage where mileage_id in
+        <foreach item="mileageId" collection="array" open="(" separator="," close=")">
+            #{mileageId}
+        </foreach>
+    </delete>
+
+    <!-- 通过阶段id批量删除里程信息 -->
+    <delete id="deleteLabSysMileageByStageIds" parameterType="String">
+        delete from lab_sys_mileage where mileage_id in
+        (
+        select mileage_id from lab_sys_stage_mileage
+        where stage_id in
+        <foreach item="stageId" collection="array" open="(" separator="," close=")">
+            #{stageId}
+        </foreach>
+        )
+    </delete>
+
+    <!-- 批量新增里程 -->
+    <insert id="batchLabSysMileage">
+        insert into lab_sys_mileage(mileage_id, mileage, create_by, create_time,
+        update_by, update_time, remark)values
+        <foreach item="item" index="index" collection="list" separator=",">
+            (#{item.mileageId},#{item.mileage},#{item.createBy},
+            GETDATE(), #{item.updateBy}, #{item.updateTime}, #{item.remark})
+        </foreach>
+    </insert>
+
+    <select id="getLabSysMileageMaxMileageId" resultType="int">
+        select MAX(mileage_id) as mileageIdMax
+        from [dbo].[lab_sys_mileage]
+    </select>
+
+    <!-- 通过阶段ID删除里程列表 -->
+    <delete id="deleteLabSysMileageByStageId" parameterType="Long">
+        delete
+        lab_sys_mileage
+        where mileage_id in(
+            select mileage_id from lab_sys_stage_mileage
+            where stage_id=
+        #{stageId}
+        )
+    </delete>
+
+    <!-- 通过stage查询关联下的里程 -->
+    <select id="searchAllMileage" resultType="String">
+        select distinct mileage
+        from lab_sys_mileage
+        where mileage_id in (
+        select mileage_id
+        from lab_sys_stage_mileage
+        where stage_id in (
+        select stage_id
+        from lab_sys_stage
+        <where>
+            <if test="stage != null">stage=#{stage}</if>
+        </where>
+        )
+        )
+    </select>
+
+</mapper>

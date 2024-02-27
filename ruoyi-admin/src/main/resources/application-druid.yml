@@ -1,0 +1,78 @@
+# 数据源配置
+spring:
+  datasource:
+    # 指定 druid 连接池
+    type: com.alibaba.druid.pool.DruidDataSource
+    # 数据库驱动(不写会自动索引，只是慢点)
+    # driverClassName: com.microsoft.sqlserver.jdbc.SQLServerDriver
+    druid:
+      # 主库数据源
+      master:
+        url: jdbc:sqlserver://10.52.6.23:1433;DatabaseName=LabSystem;trustServerCertificate=true
+        # url: jdbc:sqlserver://localhost:1433;DatabaseName=LabSystem;trustServerCertificate=true
+        username: ictsfc
+        # password: XUh7tZN9j%yTps
+        # 加密后的密码
+        password: oYoUfilFfBsa0+fb+RZ9wadZjsv7wiOgR6Oaduqg/xvdT+uwSshVrVa+aiZ9z3vjFRbzq7jp994vm9zwQY/AAw==
+        # 启用解密，配置公钥和加密后的密码
+        connectPropertiesMaster: config.decrypt=true;config.decrypt.key=MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAM3pxzYBdbja4fV9GtB2D8CdHCo5kEN7E7NRXmFnF5wcTM3CBW+YD/wQi5MTV/T2qnmSE77Z0AkMx0FxQ+t8fZMCAwEAAQ==
+      # 从库数据源
+      slave:
+        # 从数据源开关/默认关闭
+        enabled: true
+        # enabled: false
+        url: jdbc:oracle:thin:@ttscan.luxshare.com.cn:1521/sap.luxshare.com.cn
+        username: edh_bu14
+        # password: zReQr9fKLWlQ7H
+        # 加密后的密码
+        password: KUy0Fbw7uolrxDnxa5vWijFSpwUQ8D4y/5RIbZueIJUN4ogBBRSyCroNAthxIdPn6yjrZ+/vqRoqeMwOkY8G2A==
+        # 启用解密，配置公钥和加密后的密码
+        connectPropertiesSlave: config.decrypt=true;config.decrypt.key=MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBALU2AA7oZxVUXuGX9I9Jt4HtnxR7yE2nVvwwoyjV9xz3vViKUKCgd9Za5MaM9GWBwsaLqFCvH2TIjICIec9rgSMCAwEAAQ==
+        validationQuery: SELECT 1 FROM DUAL
+      # 初始连接数
+      initialSize: 5
+      # 最小连接池数量
+      minIdle: 10
+      # 最大连接池数量
+      maxActive: 20
+      # 配置获取连接等待超时的时间
+      maxWait: 60000
+      # 配置连接超时时间
+      connectTimeout: 30000
+      # 配置网络超时时间
+      socketTimeout: 60000
+      # 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒
+      timeBetweenEvictionRunsMillis: 60000
+      # 配置一个连接在池中最小生存的时间，单位是毫秒
+      minEvictableIdleTimeMillis: 300000
+      # 配置一个连接在池中最大生存的时间，单位是毫秒
+      maxEvictableIdleTimeMillis: 900000
+      # 配置检测连接是否有效
+      validationQuery: SELECT 1
+      testWhileIdle: true
+      testOnBorrow: false
+      testOnReturn: false
+      webStatFilter:
+        enabled: true
+      statViewServlet:
+        enabled: true
+        # 设置白名单，不填则允许所有访问
+        allow:
+        url-pattern: /druid/*
+        # 控制台管理用户名和密码
+        login-username: ruoyi
+        login-password: 123456
+      filter:
+        config:
+          # 是否配置加密
+          enabled: true
+        stat:
+          enabled: true
+          # 慢SQL记录
+          log-slow-sql: true
+          slow-sql-millis: 1000
+          # SQL合并
+          merge-sql: true
+        wall:
+          config:
+            multi-statement-allow: true

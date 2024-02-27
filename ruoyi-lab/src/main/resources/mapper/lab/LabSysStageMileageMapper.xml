@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.lab.mapper.LabSysStageMileageMapper">
+
+    <resultMap type="LabSysStageMileage" id="LabSysStageMileageResult">
+        <result property="stageId" column="stage_id"/>
+        <result property="mileageId" column="mileage_id"/>
+    </resultMap>
+
+    <sql id="selectLabSysStageMileageVo">
+        select stage_id, mileage_id
+        from lab_sys_stage_mileage
+    </sql>
+
+    <!-- 通过阶段id删除阶段与里程关联信息 -->
+    <delete id="deleteStageMileageByStageId" parameterType="Long">
+        delete
+        from lab_sys_stage_mileage
+        where stage_id = #{stageId}
+    </delete>
+
+    <!-- 批量删除阶段与里程关联信息 -->
+    <delete id="deleteStageMileageByStageIds" parameterType="Long">
+        delete from lab_sys_stage_mileage where stage_id in
+        <foreach collection="array" item="stageId" open="(" separator="," close=")">
+            #{stageId}
+        </foreach>
+    </delete>
+
+    <!-- 通过里程id批量删除阶段与里程关联信息 -->
+    <delete id="deleteStageMileageByMileageIds" parameterType="Long">
+        delete from lab_sys_stage_mileage where mileage_id in
+        <foreach collection="array" item="mileageId" open="(" separator="," close=")">
+            #{mileageId}
+        </foreach>
+    </delete>
+
+    <!-- 通过里程id查询里程使用数量 -->
+    <select id="countStageMileageByMileageId" resultType="Integer">
+        select count(1)
+        from lab_sys_stage_mileage
+        where mileage_id = #{mileageId}
+    </select>
+
+    <!-- 批量新增阶段与里程关联信息 -->
+    <insert id="batchStageMileage">
+        insert into lab_sys_stage_mileage(stage_id, mileage_id) values
+        <foreach item="item" index="index" collection="list" separator=",">
+            (#{item.stageId},#{item.mileageId})
+        </foreach>
+    </insert>
+
+    <!-- 新增阶段和里程关联信息 -->
+    <insert id="insertStageMileage" parameterType="LabSysStageMileage">
+        insert into lab_sys_stage_mileage
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="stageId != null">stage_id,</if>
+            <if test="mileageId != null">mileage_id,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="stageId != null">#{stageId},</if>
+            <if test="mileageId != null">#{mileageId},</if>
+        </trim>
+    </insert>
+
+    <!-- 删除里程与阶段关联信息 -->
+    <delete id="deleteStageMileageInfo">
+        delete lab_sys_stage_mileage where mileage_id = #{mileageId}
+        and stage_Id in
+        <foreach collection="stageIds" item="stageId" open="(" separator="," close=")">
+            #{stageId}
+        </foreach>
+    </delete>
+
+</mapper>

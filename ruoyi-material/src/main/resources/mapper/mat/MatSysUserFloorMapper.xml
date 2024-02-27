@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.mat.mapper.MatSysUserFloorMapper">
+
+    <resultMap type="MatSysUserFloor" id="MatSysUserFloorResult">
+        <result property="userId" column="user_id"/>
+        <result property="floorId" column="floor_id"/>
+    </resultMap>
+
+    <resultMap id="MatSysUserListResult" type="MatSysUserFloorResultInfoDto">
+        <result property="userId" column="user_id"/>
+        <result property="userName" column="user_name"/>
+        <result property="nickName" column="nick_name"/>
+        <result property="floorCode" column="floor_code"/>
+        <result property="deptName" column="dept_name"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+    </resultMap>
+
+    <!-- 新增备品用户和楼层关联信息 -->
+    <insert id="insertMatSysUserFloor" parameterType="MatSysUserFloor">
+        insert into mat_sys_user_floor
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="userId != null">user_id,</if>
+            <if test="floorId != null">floor_id,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="userId != null">#{userId},</if>
+            <if test="floorId != null">#{floorId},</if>
+        </trim>
+    </insert>
+
+    <!-- 根据用户Id删除备品用户和楼层关联 -->
+    <delete id="deleteMatSysUserFloorByUserId" parameterType="Long">
+        delete
+        from mat_sys_user_floor
+        where user_id = #{userId}
+    </delete>
+
+    <!-- 根据用户Id查询对应的楼层Id -->
+    <select id="searchMatSysUserFloorByUserId" parameterType="Long" resultType="Long">
+        select floor_id
+        from mat_sys_user_floor
+        where user_id = #{userId}
+    </select>
+
+    <!-- 查询用户和楼层关联数据 -->
+    <select id="selectSysUserFloorList" resultType="MatSysUserFloorResultDto" parameterType="MatSysUserFloorResultDto">
+        select f.floor_id as floorId,
+        f.floor_code as floorCode,
+        u.user_name as userName,
+        u.nick_name as nickName
+        from mat_sys_floor f
+        left join mat_sys_user_floor uf on uf.floor_id = f.floor_id
+        left join sys_user u on u.user_id = uf.user_id
+        <where>
+            <if test="floorCode != null and floorCode != ''">f.floor_id = #{floorId}</if>
+            <if test="userName != null and userName != ''">u.user_name = #{userName}</if>
+            <if test="nickName != null and nickName != ''">u.nick_name = #{nickName}</if>
+        </where>
+    </select>
+
+    <!-- 根据用户Id查询对应的楼层信息 -->
+    <select id="searchMatSysUserFloorInfoByUserId" parameterType="Long" resultType="MatSysFloor">
+        select f.floor_id,
+               f.floor_code
+        from mat_sys_floor f
+                 left join mat_sys_user_floor uf on uf.floor_id = f.floor_id
+        where uf.user_id = #{userId}
+    </select>
+
+    <select id="searchUserList" parameterType="MatSysUserFloorResultInfoDto" resultMap="MatSysUserListResult">
+        select u.user_id,
+        u.user_name,
+        u.nick_name,
+        f.floor_code,
+        d.dept_name,
+        u.create_time,
+        u.create_by,
+        u.update_time,
+        u.update_by,
+        u.remark
+        from sys_user u
+        left join sys_dept d on d.dept_id = u.dept_id
+        left join mat_sys_user_floor uf on uf.user_id = u.user_id
+        left join mat_sys_floor f on f.floor_id = uf.floor_id
+        <if test="userName != null and userName != ''">
+            and u.user_name like concat('%', #{userName}, '%')
+        </if>
+        <if test="floorCode != null and floorCode != ''">
+            and f.floor_code = #{floorCode}
+        </if>
+        <if test="deptName != null and deptName != ''">
+            and d.dept_name = #{deptName}
+        </if>
+        <if test="params.beginTime != null and params.beginTime != '' and params.endTime != null and params.endTime != ''">
+            and u.create_time between #{params.beginTime} and #{params.endTime}
+        </if>
+    </select>
+
+</mapper>

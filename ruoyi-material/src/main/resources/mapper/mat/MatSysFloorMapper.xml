@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.mat.mapper.MatSysFloorMapper">
+
+    <resultMap type="MatSysFloor" id="MatSysFloorResult">
+        <result property="floorId" column="floor_id"/>
+        <result property="floorCode" column="floor_code"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+    </resultMap>
+
+    <sql id="selectMatSysFloorVo">
+        select floor_id,
+               floor_code,
+               create_by,
+               create_time,
+               update_by,
+               update_time,
+               remark
+        from mat_sys_floor
+    </sql>
+
+    <!-- 查询备品楼层列表 -->
+    <select id="selectMatSysFloorList" parameterType="MatSysFloor" resultMap="MatSysFloorResult">
+        <include refid="selectMatSysFloorVo"/>
+        <where>
+            <if test="floorId != null ">and floor_id = #{floorId}</if>
+            <if test="floorCode != null  and floorCode != ''">and floor_code = #{floorCode}</if>
+            <if test="params.beginCreateTime != null and params.beginCreateTime != '' and params.endCreateTime != null and params.endCreateTime != ''">
+                and create_time between #{params.beginCreateTime} and #{params.endCreateTime}
+            </if>
+        </where>
+    </select>
+
+    <select id="selectMatSysAllFloorList" resultType="String">
+        select distinct floor_code
+        from mat_sys_floor
+    </select>
+
+    <!-- 查询备品楼层 -->
+    <select id="selectMatSysFloorByFloorId" parameterType="Long" resultMap="MatSysFloorResult">
+        <include refid="selectMatSysFloorVo"/>
+        where floor_id = #{floorId}
+    </select>
+
+    <!-- 新增备品楼层 -->
+    <insert id="insertMatSysFloor" parameterType="MatSysFloor" useGeneratedKeys="true" keyProperty="floorId">
+        insert into mat_sys_floor
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="floorId != null">floor_id,</if>
+            <if test="floorCode != null">floor_code,</if>
+            <if test="createBy != null">create_by,</if>
+            create_time,
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="floorId != null">#{floorId},</if>
+            <if test="floorCode != null">#{floorCode},</if>
+            <if test="createBy != null">#{createBy},</if>
+            GETDATE(),
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+        </trim>
+    </insert>
+
+    <!-- 修改备品楼层 -->
+    <update id="updateMatSysFloor" parameterType="MatSysFloor">
+        update mat_sys_floor
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="floorCode != null">floor_code = #{floorCode},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = GETDATE(),</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        where floor_id = #{floorId}
+    </update>
+
+    <!-- 删除备品楼层 -->
+    <delete id="deleteMatSysFloorByFloorId" parameterType="Long">
+        delete
+        from mat_sys_floor
+        where floor_id = #{floorId}
+    </delete>
+
+    <!-- 批量删除备品楼层 -->
+    <delete id="deleteMatSysFloorByFloorIds" parameterType="String">
+        delete from mat_sys_floor where floor_id in
+        <foreach item="floorId" collection="array" open="(" separator="," close=")">
+            #{floorId}
+        </foreach>
+    </delete>
+
+    <select id="selectAllFloorCode" resultType="MatSysFloor">
+        select *
+        from mat_sys_floor
+    </select>
+
+    <select id="selectFloorCodeByUserName" parameterType="String" resultType="String">
+        select f.floor_code
+        from mat_sys_floor f
+                 left join mat_sys_user_floor uf on f.floor_id = uf.floor_id
+                 left join sys_user u on uf.user_id = u.user_id
+        where u.user_name = #{userName}
+    </select>
+
+</mapper>

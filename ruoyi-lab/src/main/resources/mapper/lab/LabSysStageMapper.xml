@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.lab.mapper.LabSysStageMapper">
+
+    <resultMap type="LabSysStage" id="LabSysStageResult">
+        <result property="stageId" column="stage_id"/>
+        <result property="stage" column="stage"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+    </resultMap>
+
+    <resultMap id="LabSysStageMileageResult" type="LabSysStage" extends="LabSysStageResult">
+        <collection property="labSysMileageList" notNullColumn="sub_mileage_id" javaType="java.util.List"
+                    resultMap="LabSysMileageResult">
+        </collection>
+    </resultMap>
+
+    <resultMap type="LabSysMileage" id="LabSysMileageResult">
+        <result property="mileageId" column="sub_mileage_id"/>
+        <result property="mileage" column="sub_mileage"/>
+        <result property="createBy" column="sub_create_by"/>
+        <result property="createTime" column="sub_create_time"/>
+        <result property="updateBy" column="sub_update_by"/>
+        <result property="updateTime" column="sub_update_time"/>
+        <result property="remark" column="sub_remark"/>
+    </resultMap>
+
+    <sql id="selectStageVo">
+        select s.stage_id,
+               s.stage,
+               s.create_by,
+               s.create_time,
+               s.update_by,
+               s.update_time,
+               s.remark
+        from lab_sys_stage s
+                 left join lab_sys_stage_mileage sm on s.stage_id = sm.stage_id
+                 left join lab_sys_mileage m on m.mileage_id = sm.mileage_id
+    </sql>
+
+    <!-- 查询阶段及其相对应的里程 -->
+    <select id="selectLabSysStageMileageList" parameterType="LabSysStageMilSearchDto"
+            resultMap="LabSysStageMileageResult">
+        select s.stage_id,
+        s.stage,
+        s.create_by,
+        s.create_time,
+        s.update_by,
+        s.update_time,
+        s.remark as remark,
+        m.mileage_id as sub_mileage_id,
+        m.mileage as sub_mileage,
+        m.remark as sub_remark
+        from lab_sys_stage s
+        left join lab_sys_stage_mileage sm on s.stage_id = sm.stage_id
+        left join lab_sys_mileage m on m.mileage_id = sm.mileage_id
+        <where>
+            <if test="stageId != null">and s.stage_id=#{stageId}</if>
+            <if test="stage != null">and s.stage=#{stage}</if>
+            <if test="mileage != null">and m.mileage=#{mileage}</if>
+            <if test="params.beginCreateTime != null and params.beginCreateTime != '' and params.endCreateTime != null and params.endCreateTime != ''">
+                and s.create_time between #{params.beginCreateTime} and #{params.endCreateTime}
+            </if>
+        </where>
+        order by s.create_time desc
+    </select>
+
+    <!-- 根据条件分页查询阶段列表 -->
+    <select id="selectLabSysStageList" parameterType="LabSysStage" resultMap="LabSysStageResult">
+        <include refid="selectStageVo"/>
+        where 1=1
+        <if test="stage_id != null and stage_id != ''">
+            and s.stage_id=#{stageId}
+        </if>
+        <if test="stage != null and stage != ''">
+            and s.stage=#{stage}
+        </if>
+        <!-- 开始时间检索 -->
+        <if test="params.beginTime != null and params.beginTime != ''">
+            and date_format(s.create_time,'%y%m%d') &gt;= date_format(#{params.beginTime},'%y%m%d')
+        </if>
+        <!-- 结束时间检索 -->
+        <if test="params.endTime != null and params.endTime != ''">
+            and date_format(s.create_time,'%y%m%d') &lt;= date_format(#{params.endTime},'%y%m%d')
+        </if>
+        order by s.create_time desc
+    </select>
+
+    <!-- 根据里程id查询阶段列表 -->
+    <select id="selectLabSysStageByMileageId" parameterType="Long" resultMap="LabSysStageResult">
+        <include refid="selectStageVo"/>
+        where sm.mileage_id ={mileageId}
+        order by s.create_time desc
+    </select>
+
+    <!-- 查询所有阶段列表 -->
+    <select id="selectStageAll" resultMap="LabSysStageResult">
+        <include refid="selectStageVo"></include>
+        order by s.create_time desc
+    </select>
+
+    <!-- 根据里程ID获取阶段选择框列表 -->
+    <select id="selectStageListByMileageId" parameterType="Long" resultType="Long">
+        select s.stage_id
+        from lab_sys_stage s
+                 left join lab_sys_stage_mileage sm on s.stage_id = sm.stage_id
+                 left join lab_sys_mileage m on m.mileage_id = sm.mileage_id
+        where sm.mileage_id ={mileageId}
+    </select>
+
+    <!-- 根据阶段id查询阶段 -->
+    <select id="selectLabSysStageById" parameterType="Long" resultMap="LabSysStageResult">
+        <include refid="selectStageVo"/>
+        where s.stage_id=#{stageId}
+    </select>
+
+    <!-- 校验阶段是否唯一 -->
+    <select id="checkStageNameUnique" parameterType="String" resultMap="LabSysStageResult">
+        <include refid="selectStageVo"/>
+        where s.stage=#{stage}
+    </select>
+
+    <!-- 修改阶段 -->
+    <update id="updateLabSysStage" parameterType="LabSysStage">
+        update lab_sys_stage
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="stage != null and stage != ''">stage = #{stage},</if>
+            <if test="remark != null and remark != ''">remark = #{remark},</if>
+            <if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
+            update_time = GETDATE()
+        </trim>
+        where stage_id=#{stageId}
+    </update>
+
+    <!-- 新增阶段 -->
+    <insert id="insertLabSysStage" parameterType="LabSysStage">
+        insert into lab_sys_stage
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="stageId != null and stageId != 0">stage_id,</if>
+            <if test="stage != null">stage,</if>
+            <if test="createBy != null">create_by,</if>
+            create_time,
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="stageId != null">#{stageId},</if>
+            <if test="stage != null">#{stage},</if>
+            <if test="createBy != null">#{createBy},</if>
+            GETDATE(),
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+        </trim>
+    </insert>
+
+    <!-- 通过阶段Id删除阶段 -->
+    <delete id="deleteLabSysStageById" parameterType="Long">
+        delete
+        lab_sys_stage where stage_id=
+        #{stageId}
+    </delete>
+
+    <!-- 批量删除阶段 -->
+    <delete id="deleteLabSysStageByIds" parameterType="Long">
+        delete lab_sys_stage where stage_id in
+        <foreach collection="array" item="stageId" open="(" separator="," close=")">
+            #{stageId}
+        </foreach>
+    </delete>
+
+    <!-- lab_sys_stage表中最大的主键ID -->
+    <select id="getLabSysStageMaxStageId" resultType="int">
+        select MAX(stage_id) as stageIdMax
+        from [dbo].[lab_sys_stage]
+    </select>
+
+    <!-- 查询所有阶段 -->
+    <select id="searchAllStage" resultType="String">
+        select distinct stage
+        from lab_sys_stage
+    </select>
+
+</mapper>

@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.mat.mapper.MatSysCancelMapper">
+
+    <resultMap type="MatSysCancel" id="MatSysCancelResult">
+        <result property="matCancelId" column="mat_cancel_id"/>
+        <result property="matCode" column="mat_code"/>
+        <result property="matCancelNumber" column="mat_cancel_number"/>
+        <result property="matCancelTime" column="mat_cancel_time"/>
+        <result property="matCancelUser" column="mat_cancel_user"/>
+        <result property="matCancelReason" column="mat_cancel_reason"/>
+        <result property="matShelfCode" column="mat_shelf_code"/>
+        <result property="matName" column="mat_name"/>
+    </resultMap>
+
+    <resultMap id="MatSysCancelTotalResult" type="MatSysCancelTotalInfoDto">
+        <result property="matCancelId" column="mat_cancel_id"/>
+        <result property="matCode" column="mat_code"/>
+        <result property="matName" column="mat_name"/>
+        <result property="matCancelNumber" column="mat_cancel_number"/>
+        <result property="matPrice" column="mat_price"/>
+        <result property="matTotalPrice" column="mat_total_price"/>
+        <result property="matNumber" column="mat_number"/>
+        <result property="matCancelUser" column="mat_cancel_user"/>
+        <result property="matCancelTime" column="mat_cancel_time"/>
+        <result property="matCancelReason" column="mat_cancel_reason"/>
+        <result property="matShelfCode" column="mat_shelf_code"/>
+        <result property="matFloorCode" column="mat_floor_code"/>
+        <result property="matVendor" column="mat_vendor"/>
+        <result property="matProject" column="mat_project"/>
+    </resultMap>
+
+    <sql id="selectMatSysCancelVo">
+        select c.mat_cancel_id,
+               c.mat_code,
+               c.mat_cancel_number,
+               c.mat_cancel_time,
+               c.mat_cancel_user,
+               c.mat_cancel_reason,
+               d.mat_shelf_code,
+               d.mat_name
+        from mat_sys_cancel c
+                 left join mat_sys_detail d on c.mat_code = d.mat_code
+                 left join mat_sys_floor f on f.floor_code = d.mat_floor_code
+                 left join mat_sys_user_floor u on u.floor_id = f.floor_id
+                 left join sys_user su on su.user_id = u.user_id and su.user_name = c.mat_cancel_user
+    </sql>
+
+    <sql id="selectMatSysCancelTotalVo">
+        select c.mat_cancel_id,
+               c.mat_code,
+               d.mat_name,
+               c.mat_cancel_number,
+               d.mat_price,
+               round(c.mat_cancel_number * d.mat_price, 2) as mat_total_price,
+               d.mat_number,
+               c.mat_cancel_user,
+               c.mat_cancel_time,
+               c.mat_cancel_reason,
+               d.mat_shelf_code,
+               d.mat_floor_code,
+               d.mat_vendor,
+               d.mat_project
+        from mat_sys_cancel c
+                 left join mat_sys_detail d on c.mat_code = d.mat_code
+                 left join mat_sys_floor f on f.floor_code = d.mat_floor_code
+                 left join mat_sys_user_floor u on u.floor_id = f.floor_id
+                 left join sys_user su on su.user_id = u.user_id and su.user_name = c.mat_cancel_user
+    </sql>
+
+    <!-- 查询备品退库信息列表 -->
+    <select id="selectMatSysCancelList" parameterType="MatSysCancel" resultMap="MatSysCancelResult">
+        <include refid="selectMatSysCancelVo"/>
+        <where>
+            <if test="matCode != null and matCode != ''">and c.mat_code = #{matCode}</if>
+            <if test="matName != null and matName != ''">and d.mat_name = #{matName}</if>
+            <if test="params.beginMatCancelTime != null and params.beginMatCancelTime != '' and params.endMatCancelTime != null and params.endMatCancelTime != ''">
+                and c.mat_cancel_time between #{params.beginMatCancelTime} and #{params.endMatCancelTime}
+            </if>
+            <if test="matCancelUser != null  and matCancelUser != ''">and c.mat_cancel_user = #{matCancelUser}</if>
+            and su.user_id = #{userId}
+        </where>
+        order by c.mat_cancel_time desc
+    </select>
+
+    <!-- 查询备品总的退库信息列表 -->
+    <select id="selectMatSysCancelTotalList" parameterType="MatSysCancelTotalInfoDto" resultMap="MatSysCancelTotalResult">
+        <include refid="selectMatSysCancelTotalVo"/>
+        <where>
+            <if test="matCode != null  and matCode != ''">and c.mat_code = #{matCode}</if>
+            <if test="matName != null and matName != ''">and d.mat_name = #{matName}</if>
+            <if test="matVendor != null and matVendor != ''">and d.mat_vendor = #{matVendor}</if>
+            <if test="matProject != null and matProject != ''">and d.mat_project = #{matProject}</if>
+            <if test="params.beginMatCancelTime != null and params.beginMatCancelTime != '' and params.endMatCancelTime != null and params.endMatCancelTime != ''">
+                and c.mat_cancel_time between #{params.beginMatCancelTime} and #{params.endMatCancelTime}
+            </if>
+            <if test="matCancelUser != null  and matCancelUser != ''">and c.mat_cancel_user = #{matCancelUser}</if>
+            and su.user_id = #{userId}
+        </where>
+        order by c.mat_cancel_time desc
+    </select>
+
+    <!-- 查询备品退库信息 -->
+    <select id="selectMatSysCancelByMatCancelId" parameterType="Long" resultMap="MatSysCancelResult">
+        <include refid="selectMatSysCancelVo"/>
+        where mat_cancel_id = #{matCancelId} and su.user_id = #{userId}
+    </select>
+
+    <!-- 新增备品退库信息 -->
+    <insert id="insertMatSysCancel" parameterType="MatSysCancel" useGeneratedKeys="true" keyProperty="matCancelId">
+        insert into mat_sys_cancel
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="matCancelId != null">mat_cancel_id,</if>
+            <if test="matCode != null and matCode != ''">mat_code,</if>
+            <if test="matCancelNumber != null">mat_cancel_number,</if>
+            mat_cancel_time,
+            <if test="matCancelUser != null and matCancelUser != ''">mat_cancel_user,</if>
+            <if test="matCancelReason != null and matCancelReason != ''">mat_cancel_reason,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="matCancelId != null">#{matCancelId},</if>
+            <if test="matCode != null and matCode != ''">#{matCode},</if>
+            <if test="matCancelNumber != null">#{matCancelNumber},</if>
+            GETDATE(),
+            <if test="matCancelUser != null and matCancelUser != ''">#{matCancelUser},</if>
+            <if test="matCancelReason != null and matCancelReason != ''">#{matCancelReason},</if>
+        </trim>
+    </insert>
+
+    <!-- 根据Id删除备品退库信息 -->
+    <delete id="deleteMatSysCancelByMatCancelId" parameterType="Long">
+        delete
+        from mat_sys_cancel
+        where mat_cancel_id = #{matCancelId}
+    </delete>
+
+    <!-- 根据Id批量删除备品退库信息 -->
+    <delete id="deleteMatSysCancelByMatCancelIds" parameterType="String">
+        delete from mat_sys_cancel where mat_cancel_id in
+        <foreach item="matCancelId" collection="array" open="(" separator="," close=")">
+            #{matCancelId}
+        </foreach>
+    </delete>
+
+</mapper>

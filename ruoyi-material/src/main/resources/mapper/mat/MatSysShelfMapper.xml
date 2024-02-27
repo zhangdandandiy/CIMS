@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.mat.mapper.MatSysShelfMapper">
+
+    <resultMap type="MatSysShelf" id="MatSysShelfResult">
+        <result property="shelfId" column="shelf_id"/>
+        <result property="shelfCode" column="shelf_code"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+    </resultMap>
+
+    <sql id="selectMatSysShelfVo">
+        select s.shelf_id,
+               s.shelf_code,
+               s.create_by,
+               s.create_time,
+               s.update_by,
+               s.update_time,
+               s.remark
+        from mat_sys_shelf s
+                 left join mat_sys_floor_shelf fs on fs.shelf_id = s.shelf_id
+                 left join mat_sys_floor f on f.floor_id = fs.floor_id
+                 left join mat_sys_user_floor u on u.floor_id = f.floor_id
+    </sql>
+
+    <!-- 查询备品储位列表 -->
+    <select id="selectMatSysShelfList" parameterType="MatSysShelfSearchInfoDto" resultMap="MatSysShelfResult">
+        <include refid="selectMatSysShelfVo"/>
+        <where>
+            <if test="shelfCode != null  and shelfCode != ''">and s.shelf_code = #{shelfCode}</if>
+            <if test="params.beginCreateTime != null and params.beginCreateTime != '' and params.endCreateTime != null and params.endCreateTime != ''">
+                and s.create_time between #{params.beginCreateTime} and #{params.endCreateTime}
+            </if>
+            and u.user_id = #{userId}
+        </where>
+    </select>
+
+    <select id="selectAllShelfCode" parameterType="Long" resultType="String">
+        select distinct s.shelf_code
+        from mat_sys_shelf s
+                 left join mat_sys_floor_shelf fs on fs.shelf_id = s.shelf_id
+                 left join mat_sys_floor f on f.floor_id = fs.floor_id
+                 left join mat_sys_user_floor u on u.floor_id = f.floor_id
+        where u.user_id = #{userId}
+    </select>
+
+    <select id="selectShelfCodeByUserName" parameterType="String" resultType="String">
+        select s.shelf_code
+        from mat_sys_shelf s
+                 left join mat_sys_floor_shelf fs on fs.shelf_id = s.shelf_id
+                 left join mat_sys_floor f on f.floor_id = fs.floor_id
+                 left join mat_sys_user_floor uf on uf.floor_id = f.floor_id
+                 left join sys_user u on u.user_id = uf.user_id
+        where u.user_name = #{userName}
+    </select>
+
+    <!-- 查询备品储位 -->
+    <select id="selectMatSysShelfByShelfId" parameterType="MatSysShelfSearchInfoDto" resultMap="MatSysShelfResult">
+        <include refid="selectMatSysShelfVo"/>
+        where s.shelf_id = #{shelfId} and u.user_id = #{userId}
+    </select>
+
+    <!-- 校验储位编号唯一性 -->
+    <select id="checkMatSysShelfUnique" parameterType="MatSysShelfSearchInfoDto" resultMap="MatSysShelfResult">
+        <include refid="selectMatSysShelfVo"/>
+        <where>
+            <if test="shelfCode != null  and shelfCode != ''">and s.shelf_code = #{shelfCode}</if>
+            and u.user_id = #{userId}
+        </where>
+    </select>
+
+    <!-- 新增备品储位 -->
+    <insert id="insertMatSysShelf" parameterType="MatSysShelf">
+        insert into mat_sys_shelf
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="shelfId != null">shelf_id,</if>
+            <if test="shelfCode != null">shelf_code,</if>
+            <if test="createBy != null">create_by,</if>
+            create_time,
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="shelfId != null">#{shelfId},</if>
+            <if test="shelfCode != null">#{shelfCode},</if>
+            <if test="createBy != null">#{createBy},</if>
+            GETDATE(),
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+        </trim>
+    </insert>
+
+    <update id="updateMatSysShelf" parameterType="MatSysShelf">
+        update mat_sys_shelf
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="shelfCode != null">shelf_code = #{shelfCode},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            update_time = GETDATE(),
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        where shelf_id = #{shelfId}
+    </update>
+
+    <delete id="deleteMatSysShelfByShelfId" parameterType="Long">
+        delete
+        from mat_sys_shelf
+        where shelf_id = #{shelfId}
+    </delete>
+
+    <delete id="deleteMatSysShelfByShelfIds" parameterType="String">
+        delete from mat_sys_shelf where shelf_id in
+        <foreach item="shelfId" collection="array" open="(" separator="," close=")">
+            #{shelfId}
+        </foreach>
+    </delete>
+
+    <!-- 获取 mat_sys_shelf表中最大的主键ID -->
+    <select id="getMatSysShelfMaxShelfId" resultType="int">
+        select MAX(shelf_id) as shelfIdMax
+        from mat_sys_shelf
+    </select>
+
+</mapper>

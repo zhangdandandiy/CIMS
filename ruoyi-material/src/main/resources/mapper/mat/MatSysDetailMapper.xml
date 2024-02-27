@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.mat.mapper.MatSysDetailMapper">
+
+    <resultMap type="MatSysDetail" id="MatSysDetailResult">
+        <result property="matId" column="mat_id"/>
+        <result property="matCode" column="mat_code"/>
+        <result property="matName" column="mat_name"/>
+        <result property="matType" column="mat_type"/>
+        <result property="matModel" column="mat_model"/>
+        <result property="matSpecification" column="mat_specification"/>
+        <result property="matDescribe" column="mat_describe"/>
+        <result property="matAssignTime" column="mat_assign_time"/>
+        <result property="matShelfCode" column="mat_shelf_code"/>
+        <result property="matFloorCode" column="mat_floor_code"/>
+        <result property="matNumber" column="mat_number"/>
+        <result property="matPrice" column="mat_price"/>
+        <result property="matUnit" column="mat_unit"/>
+        <result property="matLowerLevel" column="mat_lower_level"/>
+        <result property="matUpperLevel" column="mat_upper_level"/>
+        <result property="matVendor" column="mat_vendor"/>
+        <result property="matProject" column="mat_project"/>
+        <result property="matStatus" column="mat_status"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+    </resultMap>
+
+    <sql id="selectMatSysDetailVo">
+        select d.mat_id,
+               d.mat_code,
+               d.mat_name,
+               d.mat_type,
+               d.mat_model,
+               d.mat_specification,
+               d.mat_describe,
+               d.mat_assign_time,
+               d.mat_shelf_code,
+               d.mat_floor_code,
+               d.mat_number,
+               d.mat_price,
+               d.mat_unit,
+               d.mat_lower_level,
+               d.mat_upper_level,
+               d.mat_vendor,
+               d.mat_project,
+               d.mat_status,
+               d.create_by,
+               d.create_time,
+               d.update_by,
+               d.update_time,
+               d.remark
+        from mat_sys_detail d
+                 left join mat_sys_floor f on f.floor_code = d.mat_floor_code
+                 left join mat_sys_user_floor u on u.floor_id = f.floor_id
+    </sql>
+
+    <sql id="selectAllMatSysDetailVo">
+        select mat_id,
+               mat_code,
+               mat_name,
+               mat_type,
+               mat_model,
+               mat_specification,
+               mat_describe,
+               mat_assign_time,
+               mat_shelf_code,
+               mat_floor_code,
+               mat_number,
+               mat_price,
+               mat_unit,
+               mat_lower_level,
+               mat_upper_level,
+               mat_vendor,
+               mat_project,
+               mat_status,
+               create_by,
+               create_time,
+               update_by,
+               update_time,
+               remark
+        from mat_sys_detail
+    </sql>
+
+    <!-- 查询备品详细信息列表 -->
+    <select id="selectMatSysDetailList" parameterType="MatSysDetailSearchListDto" resultMap="MatSysDetailResult">
+        <include refid="selectMatSysDetailVo"/>
+        <where>
+            <if test="matCode != null  and matCode != ''">and d.mat_code = #{matCode}</if>
+            <if test="matName != null  and matName != ''">and d.mat_name like concat('%', #{matName}, '%')</if>
+            <if test="matType != null  and matType != ''">and d.mat_type = #{matType}</if>
+            <if test="matProject != null and matProject != ''">and d.mat_project = #{matProject}</if>
+            <if test="matShelfCode != null  and matShelfCode != ''">and d.mat_shelf_code = #{matShelfCode}</if>
+            <if test="matFloorCode != null  and matFloorCode != ''">and d.mat_floor_code = #{matFloorCode}</if>
+            <if test="matStatus != null and matStatus != ''">and d.mat_status = #{matStatus}</if>
+            <if test="params.beginCreateTime != null and params.beginCreateTime != '' and params.endCreateTime != null and params.endCreateTime != ''">
+                and d.create_time between #{params.beginCreateTime} and #{params.endCreateTime}
+            </if>
+            and u.user_id = #{userId}
+        </where>
+    </select>
+
+    <!-- 查询所有被占用储位 -->
+    <select id="selectAllOccupyShelfCode" parameterType="Long" resultType="String">
+        select distinct d.mat_shelf_code
+        from mat_sys_detail d
+                 left join mat_sys_floor f on f.floor_code = d.mat_floor_code
+                 left join mat_sys_user_floor u on u.floor_id = f.floor_id
+        where u.user_id = #{userId}
+    </select>
+
+    <!-- 校验料号唯一性 -->
+    <select id="checkMatCodeUnique" parameterType="MatSysDetailSearchListDto" resultMap="MatSysDetailResult">
+        <include refid="selectMatSysDetailVo"/>
+        <where>
+            <if test="matCode != null">and d.mat_code = #{matCode}</if>
+            and u.user_id = #{userId}
+        </where>
+    </select>
+
+    <!-- 查询备品详细信息 -->
+    <select id="selectMatSysDetailByMatId" parameterType="MatSysDetailSearchInfoDto" resultMap="MatSysDetailResult">
+        <include refid="selectMatSysDetailVo"/>
+        where d.mat_id = #{matId} and u.user_id = #{userId}
+    </select>
+
+    <!-- 新增备品详细信息 -->
+    <insert id="insertMatSysDetail" parameterType="MatSysDetail" useGeneratedKeys="true" keyProperty="matId">
+        insert into mat_sys_detail(
+        <if test="matId != null and matId != 0">mat_id,</if>
+        <if test="matCode != null and matCode != ''">mat_code,</if>
+        <if test="matName != null and matName != ''">mat_name,</if>
+        <if test="matType != null and matType != ''">mat_type,</if>
+        <if test="matModel != null">mat_model,</if>
+        <if test="matSpecification != null">mat_specification,</if>
+        <if test="matDescribe != null">mat_describe,</if>
+        <if test="matAssignTime != null">mat_assign_time,</if>
+        <if test="matShelfCode != null and matShelfCode != ''">mat_shelf_code,</if>
+        <if test="matFloorCode != null and matFloorCode != ''">mat_floor_code,</if>
+        <if test="matNumber != null">mat_number,</if>
+        <if test="matPrice != null">mat_price,</if>
+        <if test="matUnit != null and matUnit != ''">mat_unit,</if>
+        <if test="matLowerLevel != null">mat_lower_level,</if>
+        <if test="matUpperLevel != null">mat_upper_level,</if>
+        <if test="matVendor != null">mat_vendor,</if>
+        <if test="matProject != null">mat_project,</if>
+        <if test="matStatus != null and matStatus != ''">mat_status,</if>
+        <if test="createBy != null and createBy != ''">create_by,</if>
+        <if test="updateBy != null and updateBy != ''">update_by,</if>
+        <if test="updateTime != null and updateTime != ''">update_time,</if>
+        <if test="remark != null and remark != ''">remark,</if>
+        create_time
+        ) values (
+        <if test="matId != null">#{matId},</if>
+        <if test="matCode != null and matCode != ''">#{matCode},</if>
+        <if test="matName != null and matName != ''">#{matName},</if>
+        <if test="matType != null and matType != ''">#{matType},</if>
+        <if test="matModel != null">#{matModel},</if>
+        <if test="matSpecification != null">#{matSpecification},</if>
+        <if test="matDescribe != null">#{matDescribe},</if>
+        <if test="matAssignTime != null">#{matAssignTime},</if>
+        <if test="matShelfCode != null and matShelfCode != ''">#{matShelfCode},</if>
+        <if test="matFloorCode != null and matFloorCode != ''">#{matFloorCode},</if>
+        <if test="matNumber != null">#{matNumber},</if>
+        <if test="matPrice != null">#{matPrice},</if>
+        <if test="matUnit != null and matUnit != ''">#{matUnit},</if>
+        <if test="matLowerLevel != null">#{matLowerLevel},</if>
+        <if test="matUpperLevel != null">#{matUpperLevel},</if>
+        <if test="matVendor != null">#{matVendor},</if>
+        <if test="matProject != null">#{matProject},</if>
+        <if test="matStatus != null and matStatus != ''">#{matStatus},</if>
+        <if test="createBy != null and createBy != ''">#{createBy},</if>
+        <if test="updateBy != null and updateBy != ''">#{updateBy},</if>
+        <if test="updateTime != null and updateTime != ''">#{updateTime},</if>
+        <if test="remark != null and remark != ''">#{remark},</if>
+        GETDATE()
+        )
+    </insert>
+
+    <!-- 修改备品详细信息 -->
+    <update id="updateMatSysDetail" parameterType="MatSysDetail">
+        update mat_sys_detail
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="matCode != null and matCode != ''">mat_code = #{matCode},</if>
+            <if test="matName != null and matName != ''">mat_name = #{matName},</if>
+            <if test="matType != null and matType != ''">mat_type = #{matType},</if>
+            <if test="matModel != null">mat_model = #{matModel},</if>
+            <if test="matSpecification != null">mat_specification = #{matSpecification},</if>
+            <if test="matDescribe != null">mat_describe = #{matDescribe},</if>
+            <if test="matAssignTime != null">mat_assign_time = #{matAssignTime},</if>
+            <if test="matShelfCode != null and matShelfCode != ''">mat_shelf_code = #{matShelfCode},</if>
+            <if test="matFloorCode != null and matFloorCode != ''">mat_floor_code = #{matFloorCode},</if>
+            <if test="matNumber != null">mat_number = #{matNumber},</if>
+            <if test="matPrice != null">mat_price = #{matPrice},</if>
+            <if test="matUnit != null and matUnit != ''">mat_unit = #{matUnit},</if>
+            <if test="matLowerLevel != null">mat_lower_level = #{matLowerLevel},</if>
+            <if test="matUpperLevel != null">mat_upper_level = #{matUpperLevel},</if>
+            <if test="matVendor != null">mat_vendor = #{matVendor},</if>
+            <if test="matProject != null">mat_project = #{matProject},</if>
+            <if test="matStatus != null and matStatus != ''">mat_status = #{matStatus},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            update_time = GETDATE(),
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        where mat_id = #{matId}
+    </update>
+
+    <!-- 根据Id删除备品详细信息 -->
+    <delete id="deleteMatSysDetailByMatId" parameterType="Long">
+        delete
+        from mat_sys_detail
+        where mat_id = #{matId}
+    </delete>
+
+    <!-- 根据Id批量删除备品详细信息 -->
+    <delete id="deleteMatSysDetailByMatIds" parameterType="String">
+        delete from mat_sys_detail where mat_id in
+        <foreach item="matId" collection="array" open="(" separator="," close=")">
+            #{matId}
+        </foreach>
+    </delete>
+
+    <!-- 通过备品编号查询备品 -->
+    <select id="selectDetailByMatCode" parameterType="MatSysDetailSearchInfoDto" resultMap="MatSysDetailResult">
+        <include refid="selectMatSysDetailVo"/>
+        where d.mat_code = #{matCode} and u.user_id = #{userId}
+    </select>
+
+    <!-- 查询备品详细信息列表 -->
+    <select id="selectAllMatSysDetailList" parameterType="MatSysDetail" resultMap="MatSysDetailResult">
+        <include refid="selectAllMatSysDetailVo"/>
+        <where>
+            <if test="matCode != null  and matCode != ''">and mat_code = #{matCode}</if>
+            <if test="matName != null  and matName != ''">and mat_name like concat('%', #{matName}, '%')</if>
+            <if test="matType != null  and matType != ''">and mat_type = #{matType}</if>
+            <if test="matModel != null  and matModel != ''">and mat_model = #{matModel}</if>
+            <if test="matProject != null and matProject != ''">and mat_project = #{matProject}</if>
+            <if test="matShelfCode != null  and matShelfCode != ''">and mat_shelf_code like concat('%', #{matShelfCode},
+                '%')
+            </if>
+            <if test="matFloorCode != null  and matFloorCode != ''">and mat_floor_code like concat('%', #{matFloorCode},
+                '%')
+            </if>
+            <if test="matStatus != null and matStatus != ''">and mat_status = #{matStatus}</if>
+        </where>
+    </select>
+
+    <!-- 查询所有应用专案 -->
+    <select id="selectAllMatProject" resultType="String">
+        select distinct mat_project
+        from mat_sys_detail
+    </select>
+
+    <select id="selectAllMatProjectByUserId" parameterType="Long" resultType="String">
+        select distinct mat_project
+        from mat_sys_detail d
+                 left join mat_sys_floor f on f.floor_code = d.mat_floor_code
+                 left join mat_sys_user_floor uf on uf.floor_id = f.floor_id
+                 left join sys_user u on u.user_id = uf.user_id
+        where u.user_id = #{userId}
+    </select>
+
+</mapper>

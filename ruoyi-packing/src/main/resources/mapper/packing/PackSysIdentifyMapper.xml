@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.packing.mapper.PackSysIdentifyMapper">
+
+    <resultMap type="PackSysIdentify" id="PackSysIdentifyResult">
+        <result property="identifyId" column="identify_id"/>
+        <result property="userName" column="user_name"/>
+        <result property="password" column="password"/>
+        <result property="identifyResult" column="identify_result"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+    </resultMap>
+
+    <sql id="selectPackSysIdentifyVo">
+        select identify_id,
+               user_name,
+               password,
+               identify_result,
+               create_by,
+               create_time,
+               update_by,
+               update_time,
+               remark
+        from pack_sys_identify
+    </sql>
+
+    <select id="selectPackSysIdentifyList" parameterType="PackSysIdentify" resultMap="PackSysIdentifyResult">
+        <include refid="selectPackSysIdentifyVo"/>
+        <where>
+            <if test="userName != null  and userName != ''">and user_name like concat('%', #{userName}, '%')</if>
+            <if test="identifyResult != null  and identifyResult != ''">and identify_result = #{identifyResult}</if>
+            <if test="params.beginCreateTime != null and params.beginCreateTime != '' and params.endCreateTime != null and params.endCreateTime != ''">
+                and create_time between #{params.beginCreateTime} and #{params.endCreateTime}
+            </if>
+        </where>
+    </select>
+
+    <select id="selectPackSysIdentifyByIdentifyId" parameterType="Long" resultMap="PackSysIdentifyResult">
+        <include refid="selectPackSysIdentifyVo"/>
+        where identify_id = #{identifyId}
+    </select>
+
+    <insert id="insertPackSysIdentify" parameterType="PackSysIdentify">
+        insert into pack_sys_identify
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="userName != null">user_name,</if>
+            <if test="password != null">password,</if>
+            <if test="identifyResult != null">identify_result,</if>
+            <if test="createBy != null">create_by,</if>
+            create_time,
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="userName != null">#{userName},</if>
+            <if test="password != null">#{password},</if>
+            <if test="identifyResult != null">#{identifyResult},</if>
+            <if test="createBy != null">#{createBy},</if>
+            getdate(),
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+        </trim>
+    </insert>
+
+    <update id="updatePackSysIdentify" parameterType="PackSysIdentify">
+        update pack_sys_identify
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="userName != null">user_name = #{userName},</if>
+            <if test="password != null">password = #{password},</if>
+            <if test="identifyResult != null">identify_result = #{identifyResult},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            update_time = getdate(),
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        where identify_id = #{identifyId}
+    </update>
+
+    <delete id="deletePackSysIdentifyByIdentifyId" parameterType="Long">
+        delete
+        from pack_sys_identify
+        where identify_id = #{identifyId}
+    </delete>
+
+    <delete id="deletePackSysIdentifyByIdentifyIds" parameterType="String">
+        delete from pack_sys_identify where identify_id in
+        <foreach item="identifyId" collection="array" open="(" separator="," close=")">
+            #{identifyId}
+        </foreach>
+    </delete>
+
+</mapper>

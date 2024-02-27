@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.mat.mapper.MatSysOutputMapper">
+
+    <resultMap type="MatSysOutput" id="MatSysOutputResult">
+        <result property="matOutputId" column="mat_output_id"/>
+        <result property="matCode" column="mat_code"/>
+        <result property="matOutputNumber" column="mat_output_number"/>
+        <result property="matReceiveDeptId" column="mat_receive_dept_id"/>
+        <result property="matReceiveUser" column="mat_receive_user"/>
+        <result property="matOutputTime" column="mat_output_time"/>
+        <result property="matOutputUser" column="mat_output_user"/>
+        <result property="matShelfCode" column="mat_shelf_code"/>
+        <result property="deptName" column="dept_name"/>
+        <result property="matName" column="mat_name"/>
+    </resultMap>
+
+    <resultMap id="MatSysOutputTotalResult" type="MatSysOutputTotalInfoDto">
+        <result property="matOutputId" column="mat_output_id"/>
+        <result property="matCode" column="mat_code"/>
+        <result property="matName" column="mat_name"/>
+        <result property="matOutputNumber" column="mat_output_number"/>
+        <result property="matPrice" column="mat_price"/>
+        <result property="matTotalPrice" column="mat_total_price"/>
+        <result property="deptName" column="dept_name"/>
+        <result property="matReceiveUser" column="mat_receive_user"/>
+        <result property="matOutputUser" column="mat_output_user"/>
+        <result property="matOutputTime" column="mat_output_time"/>
+        <result property="matShelfCode" column="mat_shelf_code"/>
+        <result property="matFloorCode" column="mat_floor_code"/>
+    </resultMap>
+
+    <sql id="selectMatSysOutputVo">
+        select o.mat_output_id,
+               o.mat_code,
+               o.mat_output_number,
+               o.mat_receive_dept_id,
+               o.mat_receive_user,
+               o.mat_output_time,
+               o.mat_output_user,
+               d.mat_shelf_code,
+               de.dept_id,
+               de.dept_name,
+               d.mat_name
+        from mat_sys_output o
+                 left join mat_sys_detail d on o.mat_code = d.mat_code
+                 left join mat_sys_floor f on f.floor_code = d.mat_floor_code
+                 left join mat_sys_user_floor u on u.floor_id = f.floor_id
+                 left join sys_dept de on de.dept_id = o.mat_receive_dept_id
+                 left join sys_user su on su.user_id = u.user_id and su.user_name = o.mat_output_user
+    </sql>
+
+    <sql id="selectMatSysOutputTotalVo">
+        select o.mat_output_id,
+               o.mat_code,
+               d.mat_name,
+               o.mat_output_number,
+               d.mat_price,
+               round(o.mat_output_number * d.mat_price, 2) as mat_total_price,
+               de.dept_name,
+               o.mat_receive_user,
+               o.mat_output_user,
+               d.mat_shelf_code,
+               d.mat_floor_code,
+               o.mat_output_time
+        from mat_sys_output o
+                 left join mat_sys_detail d on o.mat_code = d.mat_code
+                 left join mat_sys_floor f on f.floor_code = d.mat_floor_code
+                 left join mat_sys_user_floor u on u.floor_id = f.floor_id
+                 left join sys_dept de on de.dept_id = o.mat_receive_dept_id
+                 left join sys_user su on su.user_id = u.user_id and su.user_name = o.mat_output_user
+    </sql>
+
+    <select id="selectMatSysOutputList" parameterType="MatSysOutputSearchListDto" resultMap="MatSysOutputResult">
+        <include refid="selectMatSysOutputVo"/>
+        <where>
+            <if test="matCode != null  and matCode != ''">and o.mat_code = #{matCode}</if>
+            <if test="matName != null and matName != ''">and d.mat_name like concat('%', #{matName}, '%')</if>
+            <if test="matReceiveDeptId != null ">and o.mat_receive_dept_id = #{matReceiveDeptId}</if>
+            <if test="matReceiveUser != null  and matReceiveUser != ''">and o.mat_receive_user = #{matReceiveUser}</if>
+            <if test="params.beginMatOutputTime != null and params.beginMatOutputTime != '' and params.endMatOutputTime != null and params.endMatOutputTime != ''">
+                and o.mat_output_time between #{params.beginMatOutputTime} and #{params.endMatOutputTime}
+            </if>
+            <if test="matOutputUser != null  and matOutputUser != ''">and o.mat_output_user = #{matOutputUser}</if>
+            and su.user_id = #{userId}
+        </where>
+        order by o.mat_output_time desc
+    </select>
+
+    <select id="selectMatSysOutputTotalList" parameterType="MatSysOutputSearchListDto"
+            resultMap="MatSysOutputTotalResult">
+        <include refid="selectMatSysOutputTotalVo"/>
+        <where>
+            <if test="matCode != null  and matCode != ''">and o.mat_code = #{matCode}</if>
+            <if test="matName != null and matName != ''">and d.mat_name like concat('%', #{matName}, '%')</if>
+            <if test="matReceiveUser != null  and matReceiveUser != ''">and o.mat_receive_user = #{matReceiveUser}</if>
+            <if test="params.beginMatOutputTime != null and params.beginMatOutputTime != '' and params.endMatOutputTime != null and params.endMatOutputTime != ''">
+                and o.mat_output_time between #{params.beginMatOutputTime} and #{params.endMatOutputTime}
+            </if>
+            <if test="matOutputUser != null  and matOutputUser != ''">and o.mat_output_user = #{matOutputUser}</if>
+            and su.user_id = #{userId}
+        </where>
+        order by o.mat_output_time desc
+    </select>
+
+    <select id="selectMatSysOutputByMatOutputId" parameterType="MatSysOutputSearchInfoDto"
+            resultMap="MatSysOutputResult">
+        <include refid="selectMatSysOutputVo"/>
+        where o.mat_output_id = #{matOutputId} and su.user_id = #{userId}
+    </select>
+
+    <insert id="insertMatSysOutput" parameterType="MatSysOutput" useGeneratedKeys="true" keyProperty="matOutputId">
+        insert into mat_sys_output
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="matOutputId != null">mat_output_id,</if>
+            <if test="matCode != null">mat_code,</if>
+            <if test="matOutputNumber != null">mat_output_number,</if>
+            <if test="matReceiveDeptId != null">mat_receive_dept_id,</if>
+            <if test="matReceiveUser != null">mat_receive_user,</if>
+            mat_output_time,
+            <if test="matOutputUser != null">mat_output_user,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="matOutputId != null">#{matOutputId},</if>
+            <if test="matCode != null">#{matCode},</if>
+            <if test="matOutputNumber != null">#{matOutputNumber},</if>
+            <if test="matReceiveDeptId != null">#{matReceiveDeptId},</if>
+            <if test="matReceiveUser != null">#{matReceiveUser},</if>
+            GETDATE(),
+            <if test="matOutputUser != null">#{matOutputUser},</if>
+        </trim>
+    </insert>
+
+    <delete id="deleteMatSysOutputByMatOutputId" parameterType="Long">
+        delete
+        from mat_sys_output
+        where mat_output_id = #{matOutputId}
+    </delete>
+
+    <delete id="deleteMatSysOutputByMatOutputIds" parameterType="String">
+        delete from mat_sys_output where mat_output_id in
+        <foreach item="matOutputId" collection="array" open="(" separator="," close=")">
+            #{matOutputId}
+        </foreach>
+    </delete>
+
+</mapper>

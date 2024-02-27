@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.mat.mapper.MatSysFloorShelfMapper">
+
+    <resultMap type="MatSysFloorShelf" id="MatSysFloorShelfResult">
+        <result property="floorId"    column="floor_id"    />
+        <result property="shelfId"    column="shelf_id"    />
+    </resultMap>
+
+    <!-- 新增备品楼层和储位关联 -->
+    <insert id="insertMatSysFloorShelf" parameterType="MatSysFloorShelf">
+        insert into mat_sys_floor_shelf
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="floorId != null">floor_id,</if>
+            <if test="shelfId != null">shelf_id,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="floorId != null">#{floorId},</if>
+            <if test="shelfId != null">#{shelfId},</if>
+        </trim>
+    </insert>
+
+    <!-- 通过楼层Id批量删除备品楼层和储位关联 -->
+    <delete id="deleteMatSysFloorShelfByFloorIds" parameterType="String">
+        delete from mat_sys_floor_shelf where floor_id in
+        <foreach item="floorId" collection="array" open="(" separator="," close=")">
+            #{floorId}
+        </foreach>
+    </delete>
+
+    <!-- 通过储位Id批量删除备品楼层和储位关联 -->
+    <delete id="deleteMatSysFloorShelfByShelfIds" parameterType="String">
+        delete from mat_sys_floor_shelf where shelf_id in
+        <foreach item="shelfId" collection="array" open="(" separator="," close=")">
+            #{shelfId}
+        </foreach>
+    </delete>
+
+</mapper>

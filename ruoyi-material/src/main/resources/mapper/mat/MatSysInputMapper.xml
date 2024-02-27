@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.mat.mapper.MatSysInputMapper">
+
+    <resultMap type="MatSysInput" id="MatSysInputResult">
+        <result property="matInputId" column="mat_input_id"/>
+        <result property="matCode" column="mat_code"/>
+        <result property="matInputNumber" column="mat_input_number"/>
+        <result property="matInputTime" column="mat_input_time"/>
+        <result property="matInputUser" column="mat_input_user"/>
+        <result property="matShelfCode" column="mat_shelf_code"/>
+        <result property="matName" column="mat_name"/>
+        <result property="matNumber" column="mat_number"/>
+    </resultMap>
+
+    <resultMap type="MatSysInputTotalInfoDto" id="MatSysInputTotalResult">
+        <result property="matInputId" column="mat_input_id"/>
+        <result property="matCode" column="mat_code"/>
+        <result property="matName" column="mat_name"/>
+        <result property="matInputNumber" column="mat_input_number"/>
+        <result property="matPrice" column="mat_price"/>
+        <result property="matTotalPrice" column="mat_total_price"/>
+        <result property="matNumber" column="mat_number"/>
+        <result property="matInputUser" column="mat_input_user"/>
+        <result property="matInputTime" column="mat_input_time"/>
+        <result property="matShelfCode" column="mat_shelf_code"/>
+        <result property="matFloorCode" column="mat_floor_code"/>
+    </resultMap>
+
+    <sql id="selectMatSysInputVo">
+        select i.mat_input_id,
+               i.mat_code,
+               i.mat_input_number,
+               i.mat_input_time,
+               i.mat_input_user,
+               d.mat_shelf_code,
+               d.mat_name,
+               d.mat_number
+        from mat_sys_input i
+                 left join mat_sys_detail d on i.mat_code = d.mat_code
+                 left join mat_sys_floor f on f.floor_code = d.mat_floor_code
+                 left join mat_sys_user_floor u on u.floor_id = f.floor_id
+                 left join sys_user su on su.user_id = u.user_id and su.user_name = i.mat_input_user
+    </sql>
+
+    <sql id="selectMatSysInputTotalVo">
+        select i.mat_input_id,
+               i.mat_code,
+               d.mat_name,
+               i.mat_input_number,
+               d.mat_price,
+               round(i.mat_input_number * d.mat_price, 2) as mat_total_price,
+               d.mat_number,
+               i.mat_input_user,
+               i.mat_input_time,
+               d.mat_shelf_code,
+               d.mat_floor_code
+        from mat_sys_input i
+                 left join mat_sys_detail d on i.mat_code = d.mat_code
+                 left join mat_sys_floor f on f.floor_code = d.mat_floor_code
+                 left join mat_sys_user_floor u on u.floor_id = f.floor_id
+                 left join sys_user su on su.user_id = u.user_id and su.user_name = i.mat_input_user
+    </sql>
+
+    <!-- 查询备品入库信息列表 -->
+    <select id="selectMatSysInputList" parameterType="MatSysInputSearchListDto" resultMap="MatSysInputResult">
+        <include refid="selectMatSysInputVo"/>
+        <where>
+            <if test="matCode != null  and matCode != ''">and i.mat_code = #{matCode}</if>
+            <if test="matName != null and matName != ''">and d.mat_name like concat('%', #{matName}, '%')</if>
+            <if test="params.beginMatInputTime != null and params.beginMatInputTime != '' and params.endMatInputTime != null and params.endMatInputTime != ''">
+                and i.mat_input_time between #{params.beginMatInputTime} and #{params.endMatInputTime}
+            </if>
+            <if test="matInputUser != null  and matInputUser != ''">and i.mat_input_user = #{matInputUser}</if>
+            and su.user_id = #{userId}
+        </where>
+        order by i.mat_input_number desc
+    </select>
+
+    <!-- 查询备品总的入库信息列表 -->
+    <select id="selectMatSysInputTotalList" parameterType="MatSysInputSearchListDto" resultMap="MatSysInputTotalResult">
+        <include refid="selectMatSysInputTotalVo"/>
+        <where>
+            <if test="matCode != null  and matCode != ''">and i.mat_code = #{matCode}</if>
+            <if test="matName != null and matName != ''">and d.mat_name like concat('%', #{matName}, '%')</if>
+            <if test="params.beginMatInputTime != null and params.beginMatInputTime != '' and params.endMatInputTime != null and params.endMatInputTime != ''">
+                and i.mat_input_time between #{params.beginMatInputTime} and #{params.endMatInputTime}
+            </if>
+            <if test="matInputUser != null  and matInputUser != ''">and i.mat_input_user = #{matInputUser}</if>
+            and su.user_id = #{userId}
+        </where>
+        order by i.mat_input_time desc
+    </select>
+
+    <!-- 查询备品入库信息 -->
+    <select id="selectMatSysInputByMatInputId" parameterType="MatSysInputSearchInfoDto" resultMap="MatSysInputResult">
+        <include refid="selectMatSysInputVo"/>
+        where i.mat_input_id = #{matInputId} and su.user_id = #{userId}
+    </select>
+
+    <!-- 新增备品入库信息 -->
+    <insert id="insertMatSysInput" parameterType="MatSysInput" useGeneratedKeys="true" keyProperty="matInputId">
+        insert into mat_sys_input
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="matInputId != null">mat_input_id,</if>
+            <if test="matCode != null">mat_code,</if>
+            <if test="matInputNumber != null">mat_input_number,</if>
+            mat_input_time,
+            <if test="matInputUser != null">mat_input_user,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="matInputId != null">#{matInputId},</if>
+            <if test="matCode != null">#{matCode},</if>
+            <if test="matInputNumber != null">#{matInputNumber},</if>
+            GETDATE(),
+            <if test="matInputUser != null">#{matInputUser},</if>
+        </trim>
+    </insert>
+
+    <!-- 根据Id删除备品入库信息 -->
+    <delete id="deleteMatSysInputByMatInputId" parameterType="Long">
+        delete
+        from mat_sys_input
+        where mat_input_id = #{matInputId}
+    </delete>
+
+    <!-- 根据Id批量删除备品入库信息 -->
+    <delete id="deleteMatSysInputByMatInputIds" parameterType="String">
+        delete from mat_sys_input where mat_input_id in
+        <foreach item="matInputId" collection="array" open="(" separator="," close=")">
+            #{matInputId}
+        </foreach>
+    </delete>
+
+</mapper>
