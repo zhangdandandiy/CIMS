@@ -78,6 +78,7 @@ public class SysLoginController {
             roleList.add(sysRole);
         }
         user.setRoles(roleList);
+        // 权限集合(Set不会添加重复元素)
         Set<String> permissions = permissionService.getMenuPermission(user);
         AjaxResult ajax = AjaxResult.success();
         ajax.put("user", user);

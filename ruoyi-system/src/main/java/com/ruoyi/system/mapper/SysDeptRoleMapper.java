@@ -35,4 +35,12 @@ public interface SysDeptRoleMapper {
      */
     public int deleteSysDeptRoleByDeptId(Long deptId);
 
+    /**
+     * 根据部门ID查询相对应的角色
+     *
+     * @param deptId
+     * @return
+     */
+    public Long getSysUserRoleId(Long deptId);
+
 }

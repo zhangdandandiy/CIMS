@@ -115,6 +115,14 @@ public interface SysUserMapper {
     public SysUser checkUserNameUnique(String userName);
 
     /**
+     * 根据用户名查询用户 ID
+     *
+     * @param userName
+     * @return
+     */
+    public Long getSysUserId(String userName);
+
+    /**
      * 校验手机号码是否唯一
      *
      * @param phonenumber 手机号码
@@ -146,6 +154,15 @@ public interface SysUserMapper {
      */
     @DataSource(value = DataSourceType.SLAVE)
     public String getUserDeptCode(String userName);
+
+    /**
+     * 根据用户名查询用户姓名
+     *
+     * @param userName
+     * @return
+     */
+    @DataSource(value = DataSourceType.SLAVE)
+    public String getUserNickName(String userName);
 
     /**
      * 根据部门ID获取用户列表

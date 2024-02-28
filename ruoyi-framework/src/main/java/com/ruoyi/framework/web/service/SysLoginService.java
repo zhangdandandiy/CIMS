@@ -18,8 +18,11 @@ import com.ruoyi.framework.manager.AsyncManager;
 import com.ruoyi.framework.manager.factory.AsyncFactory;
 import com.ruoyi.framework.security.context.AuthenticationContextHolder;
 import com.ruoyi.system.domain.SysCheckUser;
+import com.ruoyi.system.domain.SysUserRole;
 import com.ruoyi.system.mapper.SysDeptMapper;
+import com.ruoyi.system.mapper.SysDeptRoleMapper;
 import com.ruoyi.system.mapper.SysUserMapper;
+import com.ruoyi.system.mapper.SysUserRoleMapper;
 import com.ruoyi.system.service.ISysConfigService;
 import com.ruoyi.system.service.ISysUserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,6 +68,12 @@ public class SysLoginService {
 
     @Autowired
     private SysDeptMapper sysDeptMapper;
+
+    @Autowired
+    private SysDeptRoleMapper sysDeptRoleMapper;
+
+    @Autowired
+    private SysUserRoleMapper sysUserRoleMapper;
 
     @Autowired
     private RestTemplate restTemplate;
@@ -180,14 +189,29 @@ public class SysLoginService {
                     }
                 } else {
                     // 没有这个用户说明是第一次登录，需要插入数据库表
-                    user.setUserName(username);
-                    user.setPassword(SecurityUtils.encryptPassword(password));
+                    SysUser newUser = new SysUser();
+                    newUser.setUserName(username);
+                    newUser.setPassword(SecurityUtils.encryptPassword(password));
                     // 查询用户的部门编号
                     String deptCode = sysUserMapper.getUserDeptCode(username);
                     // 根据部门编号查询部门ID(查不到部门的情况暂时不考虑)
-                    Long deptID = sysDeptMapper.getDeptId(deptCode);
-                    user.setDeptId(deptID);
-                    userService.insertUser(user);
+                    Long deptId = sysDeptMapper.getDeptId(deptCode);
+                    newUser.setDeptId(deptId);
+                    // 根据工号查询姓名
+                    String nickName = sysUserMapper.getUserNickName(username);
+                    newUser.setNickName(nickName);
+                    userService.insertUser(newUser);
+
+                    // 插入完才知道 用户id
+                    Long userId = sysUserMapper.getSysUserId(username);
+
+                    // 插入用户角色信息
+                    Long roleId = sysDeptRoleMapper.getSysUserRoleId(deptId);
+                    SysUserRole sysUserRole = new SysUserRole();
+                    sysUserRole.setRoleId(roleId);
+                    sysUserRole.setUserId(userId);
+                    sysUserRoleMapper.insertUserRole(sysUserRole);
+
                 }
             }
         }

@@ -111,7 +111,7 @@ public class SysMenuServiceImpl implements ISysMenuService {
      * @return
      */
     @Override
-    public Set<String> selectMenuPermsByDeptId(Long deptId){
+    public Set<String> selectMenuPermsByDeptId(Long deptId) {
         List<String> perms = menuMapper.selectMenuPermsByDeptId(deptId);
         Set<String> permsSet = new HashSet<>();
         for (String perm : perms) {
@@ -136,8 +136,17 @@ public class SysMenuServiceImpl implements ISysMenuService {
         if (SecurityUtils.isAdmin(userId)) {
             menus = menuMapper.selectMenuTreeAll();
         } else {
+            // menus = menuMapper.selectMenuTreeByUserId(userId);
+            // menus.addAll(menuMapper.selectMenuTreeByDeptId(deptId));
             menus = menuMapper.selectMenuTreeByUserId(userId);
-            menus.addAll(menuMapper.selectMenuTreeByDeptId(deptId));
+            List<SysMenu> menuList = menuMapper.selectMenuTreeByDeptId(deptId);
+
+            // 过滤不相同的属性
+            List<SysMenu> addMenu = menuList.stream()
+                    .filter(sysMenu -> menus.stream()
+                            .noneMatch(menu -> menu.getMenuName().equals(sysMenu.getMenuName())))
+                    .collect(Collectors.toList());
+            menus.addAll(addMenu);
         }
         return getChildPerms(menus, 0);
     }
