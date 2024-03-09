@@ -1,15 +1,17 @@
 package com.ruoyi.system.mapper;
 
-import java.util.List;
 import com.ruoyi.system.domain.SysOperLog;
+import org.apache.ibatis.annotations.Mapper;
+
+import java.util.List;
 
 /**
  * 操作日志 数据层
  *
  * @author Dandan
  */
-public interface SysOperLogMapper
-{
+@Mapper
+public interface SysOperLogMapper {
     /**
      * 新增操作日志
      *

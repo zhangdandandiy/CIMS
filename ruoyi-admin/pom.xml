@@ -105,6 +105,12 @@
             <artifactId>ruoyi-packing</artifactId>
         </dependency>
 
+        <!-- 模具系统 -->
+        <dependency>
+            <groupId>com.ruoyi</groupId>
+            <artifactId>ruoyi-mould</artifactId>
+        </dependency>
+
         <!-- 优雅关闭应用 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

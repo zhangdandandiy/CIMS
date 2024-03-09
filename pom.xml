@@ -197,6 +197,13 @@
                 <version>${ruoyi.version}</version>
             </dependency>
 
+            <!-- 模具模块 -->
+            <dependency>
+                <groupId>com.ruoyi</groupId>
+                <artifactId>ruoyi-mould</artifactId>
+                <version>${ruoyi.version}</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 
@@ -210,6 +217,7 @@
         <module>ruoyi-lab</module>
         <module>ruoyi-material</module>
         <module>ruoyi-packing</module>
+        <module>ruoyi-mould</module>
     </modules>
     <packaging>pom</packaging>
 

@@ -27,6 +27,7 @@ public class AsyncFactory {
 
     /**
      * 记录登录信息
+     * 创建任务
      *
      * @param username 用户名
      * @param status   状态

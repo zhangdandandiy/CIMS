@@ -43,6 +43,15 @@ public class ThreadPoolConfig {
 
     /**
      * 执行周期性或定时任务
+     * 在登录或者退出时创建记录日志的任务，交给线程池执行
+     * 这段代码是用来定义一个名为 scheduledExecutorService 的 Bean，它返回一个 ScheduledExecutorService 类型的实例。
+     * ScheduledExecutorService 是一个用于定时或延迟执行任务 ExecutorService，具体实现是一 ScheduledThreadPooLExecutor.
+     * 可以通过构造函数设置核心线程数、线程工厂和拒绝策略。
+     * 其中，BasicThreadFactory，Builder()是用于创建线程的工厂类，设置了线程命名格式，线程是否为守护线程等居性,
+     * 这里的命名格式为"schedule-pool-%d"，表示线程名字以"schedule-pool-"开头，%d为数字序列。这样可以方便地识别线程来源
+     * 拒绝策略是 CaLLerRunsPolicy，这意味着如果任务队列已满，新提交的任务将由提交任务的线程来执行，即当前线程会执行任务。
+     * 这段代码还覆盖了 ScheduledThreadPoolExecutor的afterExecute() 方法，用于在线程执行完毕后打印可能的异常信息，
+     * Threads.printException(r，t) 是一个自定义的工具类方法，用于打印异常信息。
      */
     @Bean(name = "scheduledExecutorService")
     protected ScheduledExecutorService scheduledExecutorService() {
