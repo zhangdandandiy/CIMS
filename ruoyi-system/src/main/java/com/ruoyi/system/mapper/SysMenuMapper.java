@@ -140,4 +140,28 @@ public interface SysMenuMapper {
      * @return 结果
      */
     public SysMenu checkMenuNameUnique(@Param("menuName") String menuName, @Param("parentId") Long parentId);
+
+    /**
+     * 根据部门 Id 查询部门权限列表
+     *
+     * @param deptId
+     * @return
+     */
+    public List<String> getDeptMenuPre(Long deptId);
+
+    /**
+     * 根据角色标识符查询部门权限列表
+     *
+     * @param roleKey
+     * @return
+     */
+    public List<String> getRoleMenuPre(String roleKey);
+
+    /**
+     * 获取所有部门权限列表
+     *
+     * @return
+     */
+    public List<String> getAllRoleMenuPre();
+
 }

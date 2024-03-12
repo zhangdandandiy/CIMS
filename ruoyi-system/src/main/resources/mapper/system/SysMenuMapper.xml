@@ -25,11 +25,13 @@
         <result property="updateTime" column="update_time"/>
         <result property="updateBy" column="update_by"/>
         <result property="remark" column="remark"/>
+        <result property="txRemark" column="tx_remark"/>
     </resultMap>
 
     <sql id="selectMenuVo">
         select menu_id,
                menu_name,
+               tx_remark,
                parent_id,
                order_num,
                path,
@@ -47,8 +49,7 @@
     </sql>
 
     <sql id="selectMenuVoTop1">
-        select top(1)
-                                    menu_id,
+        select top(1)               menu_id,
                menu_name,
                parent_id,
                order_num,
@@ -85,6 +86,7 @@
     <select id="selectMenuTreeAll" resultMap="SysMenuResult">
         select distinct m.menu_id,
                         m.parent_id,
+                        m.tx_remark,
                         m.menu_name,
                         m.path,
                         m.component,
@@ -105,7 +107,8 @@
     </select>
 
     <select id="selectMenuListByUserId" parameterType="SysMenu" resultMap="SysMenuResult">
-        select distinct m.menu_id, m.parent_id, m.menu_name, m.path, m.component, m.query, m.visible, m.status,
+        select distinct m.menu_id, m.tx_remark,m.parent_id, m.menu_name, m.path, m.component, m.query, m.visible,
+        m.status,
         ISNULL(m.perms,'') as perms, m.is_frame, m.is_cache, m.menu_type, m.icon, m.order_num, m.create_time
         from sys_menu m
         left join sys_role_menu rm on m.menu_id = rm.menu_id
@@ -126,6 +129,7 @@
 
     <select id="selectMenuTreeByUserId" parameterType="Long" resultMap="SysMenuResult">
         select distinct m.menu_id,
+                        m.tx_remark,
                         m.parent_id,
                         m.menu_name,
                         m.path,
@@ -155,6 +159,7 @@
     <select id="selectMenuTreeByDeptId" parameterType="Long" resultMap="SysMenuResult">
         select distinct m.menu_id,
                         m.parent_id,
+                        m.tx_remark,
                         m.menu_name,
                         m.path,
                         m.component,
@@ -263,6 +268,7 @@
             <if test="icon !=null and icon != ''">icon = #{icon},</if>
             <if test="remark != null and remark != ''">remark = #{remark},</if>
             <if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
+            <if test="txRemark != null and txRemark != ''">tx_remark = #{txRemark},</if>
             update_time = GETDATE()
         </set>
         where menu_id = #{menuId}
@@ -286,6 +292,7 @@
         <if test="icon != null and icon != ''">icon,</if>
         <if test="remark != null and remark != ''">remark,</if>
         <if test="createBy != null and createBy != ''">create_by,</if>
+        <if test="txRemark != null and txRemark != ''">tx_remark,</if>
         create_time
         )values(
         <if test="menuId != null and menuId != 0">#{menuId},</if>
@@ -304,6 +311,7 @@
         <if test="icon != null and icon != ''">#{icon},</if>
         <if test="remark != null and remark != ''">#{remark},</if>
         <if test="createBy != null and createBy != ''">#{createBy},</if>
+        <if test="txRemark != null and txRemark != ''">#{txRemark},</if>
         GETDATE()
         )
     </insert>
@@ -313,5 +321,31 @@
         from sys_menu
         where menu_id = #{menuId}
     </delete>
+
+    <select id="getDeptMenuPre" parameterType="Long" resultType="String">
+        select distinct m.tx_remark
+        from sys_menu m
+                 left join sys_role_menu rm on rm.menu_id = m.menu_id
+                 left join sys_role r on r.role_id = rm.role_id
+                 left join sys_dept_role dr on dr.role_id = r.role_id
+                 left join sys_dept d on d.dept_id = dr.dept_id
+        where d.dept_id = #{deptId}
+          and m.tx_remark is not null
+    </select>
+
+    <select id="getRoleMenuPre" parameterType="String" resultType="String">
+        select distinct m.tx_remark
+        from sys_menu m
+                 left join sys_role_menu rm on rm.menu_id = m.menu_id
+                 left join sys_role r on r.role_id = rm.role_id
+        where r.role_key = #{roleKey}
+          and m.tx_remark is not null
+    </select>
+
+    <select id="getAllRoleMenuPre" resultType="String">
+        select distinct tx_remark
+        from sys_menu
+        where tx_remark is not null
+    </select>
 
 </mapper>

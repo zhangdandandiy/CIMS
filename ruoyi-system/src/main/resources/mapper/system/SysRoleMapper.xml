@@ -21,6 +21,12 @@
         <result property="remark" column="remark"/>
     </resultMap>
 
+    <resultMap type="SysSyncRole" id="SysSyncRoleResult">
+        <result property="roleCode" column="roleCode"/>
+        <result property="roleName" column="roleName"/>
+        <result property="description" column="description"/>
+    </resultMap>
+
     <sql id="selectRoleVo">
         select distinct r.role_id,
                         r.role_name,
@@ -180,5 +186,42 @@
             #{roleId}
         </foreach>
     </delete>
+
+    <select id="getSysRoleByDeptId" parameterType="Long" resultMap="SysRoleResult">
+        select *
+        from sys_role r
+                 left join sys_dept_role dr on dr.role_id = r.role_id
+                 left join sys_dept d on d.dept_id = dr.dept_id
+        where d.dept_id = #{deptId}
+    </select>
+
+    <select id="getSysRoleKeyByUserName" resultType="String">
+        select r.role_key
+        from sys_role r
+                 left join sys_user_role ur on ur.role_id = r.role_id
+                 left join sys_user u on u.user_id = ur.user_id
+        where u.user_name = #{userName}
+        union
+        select r.role_key
+        from sys_role r
+                 left join sys_dept_role dr on dr.role_id = r.role_id
+                 left join sys_dept d on d.dept_id = dr.dept_id
+        where d.dept_id = #{deptId}
+    </select>
+
+
+    <select id="getSysRoleByUserName" resultMap="SysSyncRoleResult">
+        select r.role_key as roleCode, r.role_name as roleName, r.remark as description
+        from sys_role r
+                 left join sys_user_role ur on ur.role_id = r.role_id
+                 left join sys_user u on u.user_id = ur.user_id
+        where u.user_name = #{userName}
+        union
+        select r.role_key as roleCode, r.role_name as roleName, r.remark as description
+        from sys_role r
+                 left join sys_dept_role dr on dr.role_id = r.role_id
+                 left join sys_dept d on d.dept_id = dr.dept_id
+        where d.dept_id = #{deptId}
+    </select>
 
 </mapper>

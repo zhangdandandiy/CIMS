@@ -1,5 +1,6 @@
 package com.ruoyi.common.utils.http;
 
+import com.google.gson.Gson;
 import com.ruoyi.common.constant.Constants;
 import com.ruoyi.common.utils.StringUtils;
 import org.slf4j.Logger;
@@ -7,12 +8,10 @@ import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.*;
 import java.io.*;
-import java.net.ConnectException;
-import java.net.SocketTimeoutException;
-import java.net.URL;
-import java.net.URLConnection;
+import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.security.cert.X509Certificate;
+import java.util.List;
 
 /**
  * 通用http发送方法
@@ -182,6 +181,63 @@ public class HttpUtils {
             log.error("调用HttpUtils.sendSSLPost IOException, url=" + url + ",param=" + param, e);
         } catch (Exception e) {
             log.error("调用HttpsUtil.sendSSLPost Exception, url=" + url + ",param=" + param, e);
+        }
+        return result.toString();
+    }
+
+    /**
+     * 向指定 URL 发送POST方法的请求
+     *
+     * @param url        发送请求的 URL
+     * @param parameters 请求参数，请求参数应该是 List<T> 的形式
+     * @return 所代表远程资源的响应结果
+     */
+    public static <T> String sendPost(String url, List<T> parameters) {
+        PrintWriter out = null;
+        BufferedReader in = null;
+        StringBuilder result = new StringBuilder();
+        try {
+            log.info("sendPost - {}", url);
+            URL realUrl = new URL(url);
+            HttpURLConnection conn = (HttpURLConnection) realUrl.openConnection();
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("Content-Type", "application/json");
+            conn.setDoOutput(true);
+            conn.setDoInput(true);
+
+            // 将List<T>转换为JSON字符串
+            Gson gson = new Gson();
+            String jsonParameters = gson.toJson(parameters);
+
+            out = new PrintWriter(conn.getOutputStream());
+            out.print(jsonParameters);
+            out.flush();
+
+            in = new BufferedReader(new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8));
+            String line;
+            while ((line = in.readLine()) != null) {
+                result.append(line);
+            }
+            log.info("recv - {}", result);
+        } catch (ConnectException e) {
+            log.error("调用HttpUtils.sendPost ConnectException, url=" + url + ",parameters=" + parameters, e);
+        } catch (SocketTimeoutException e) {
+            log.error("调用HttpUtils.sendPost SocketTimeoutException, url=" + url + ",parameters=" + parameters, e);
+        } catch (IOException e) {
+            log.error("调用HttpUtils.sendPost IOException, url=" + url + ",parameters=" + parameters, e);
+        } catch (Exception e) {
+            log.error("调用HttpsUtil.sendPost Exception, url=" + url + ",parameters=" + parameters, e);
+        } finally {
+            try {
+                if (out != null) {
+                    out.close();
+                }
+                if (in != null) {
+                    in.close();
+                }
+            } catch (IOException ex) {
+                log.error("调用in.close Exception, url=" + url + ",parameters=" + parameters, ex);
+            }
         }
         return result.toString();
     }

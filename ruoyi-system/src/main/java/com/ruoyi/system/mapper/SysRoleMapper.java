@@ -1,7 +1,9 @@
 package com.ruoyi.system.mapper;
 
 import com.ruoyi.common.core.domain.entity.SysRole;
+import com.ruoyi.system.domain.SysSyncRole;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -114,4 +116,23 @@ public interface SysRoleMapper {
      * @return 结果
      */
     public int deleteRoleByIds(Long[] roleIds);
+
+    /**
+     * 根据部门ID查询相对应的角色信息
+     */
+    public SysRole getSysRoleByDeptId(Long deptId);
+
+    /**
+     * 根据用户名 & 部门Id 查询用户拥有的角色信息
+     */
+    public List<String> getSysRoleKeyByUserName(@Param("userName") String userName, @Param("deptId") Long deptId);
+
+    /**
+     * 根据用户名 & 部门Id 查询用户拥有的角色信息
+     *
+     * @param userName
+     * @return
+     */
+    public List<SysSyncRole> getSysRoleByUserName(@Param("userName") String userName, @Param("deptId") Long deptId);
+
 }

@@ -2,27 +2,26 @@ package com.ruoyi.framework.web.service;
 
 import com.ruoyi.common.constant.CacheConstants;
 import com.ruoyi.common.constant.Constants;
+import com.ruoyi.common.core.domain.entity.SysDept;
 import com.ruoyi.common.core.domain.entity.SysUser;
 import com.ruoyi.common.core.domain.model.LoginUser;
 import com.ruoyi.common.core.redis.RedisCache;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.exception.user.CaptchaException;
 import com.ruoyi.common.exception.user.CaptchaExpireException;
+import com.ruoyi.common.exception.user.UserInfoNoSyncException;
 import com.ruoyi.common.exception.user.UserPasswordNotMatchException;
 import com.ruoyi.common.utils.DateUtils;
 import com.ruoyi.common.utils.MessageUtils;
 import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.common.utils.StringUtils;
+import com.ruoyi.common.utils.http.HttpUtils;
 import com.ruoyi.common.utils.ip.IpUtils;
 import com.ruoyi.framework.manager.AsyncManager;
 import com.ruoyi.framework.manager.factory.AsyncFactory;
 import com.ruoyi.framework.security.context.AuthenticationContextHolder;
-import com.ruoyi.system.domain.SysCheckUser;
-import com.ruoyi.system.domain.SysUserRole;
-import com.ruoyi.system.mapper.SysDeptMapper;
-import com.ruoyi.system.mapper.SysDeptRoleMapper;
-import com.ruoyi.system.mapper.SysUserMapper;
-import com.ruoyi.system.mapper.SysUserRoleMapper;
+import com.ruoyi.system.domain.*;
+import com.ruoyi.system.mapper.*;
 import com.ruoyi.system.service.ISysConfigService;
 import com.ruoyi.system.service.ISysUserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +38,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 
 /**
  * 登录校验方法
@@ -76,10 +77,13 @@ public class SysLoginService {
     private SysUserRoleMapper sysUserRoleMapper;
 
     @Autowired
-    private RestTemplate restTemplate;
+    private SysRoleMapper sysRoleMapper;
 
-    // 请求路径
-    private static final String RequestUrl = "https://m.luxshare-ict.com/api/Account/CheckUser";
+    @Autowired
+    private SysMenuMapper sysMenuMapper;
+
+    @Autowired
+    private RestTemplate restTemplate;
 
     // 是否允许账户多终端同时登录（true允许 false不允许）
     @Value("${token.soloLogin}")
@@ -215,6 +219,12 @@ public class SysLoginService {
                 }
             }
         }
+
+        // 同步信息
+        if (!syncInfo(username, password)) {
+            throw new UserInfoNoSyncException();
+        }
+
 //        if (password.length() < UserConstants.PASSWORD_MIN_LENGTH
 //                || password.length() > UserConstants.PASSWORD_MAX_LENGTH) {
 //            AsyncManager.me().execute(AsyncFactory.recordLogininfor(username, Constants.LOGIN_FAIL, MessageUtils.message("user.password.not.match")));
@@ -258,12 +268,152 @@ public class SysLoginService {
      * @return
      */
     public boolean validateUser(SysCheckUser sysCheckUser) {
+        // 请求路径
+        String RequestUrl = "https://m.luxshare-ict.com/api/Account/CheckUser";
         HttpHeaders headers = new HttpHeaders();
         // 创建HttpEntity来包装请求体和请求头
         HttpEntity<Object> requestEntity = new HttpEntity<>(sysCheckUser, headers);
         RetryTemplate retryTemplate = new RetryTemplate();
         LinkedHashMap response = retryTemplate.execute(context -> restTemplate.exchange(RequestUrl, HttpMethod.POST, requestEntity, LinkedHashMap.class).getBody());
         return (Boolean) response.get("IsSuccess");
+    }
+
+    /**
+     * 同步信息
+     */
+    public boolean syncInfo(String username, String password) {
+        // 根据用户名查询用户信息
+        SysUser sysUser = sysUserMapper.selectUserByUserName(username);
+        // 部门信息
+        SysDept sysDept = sysUser.getDept();
+        // 部门 Id
+        Long deptId = sysDept.getDeptId();
+        // 角色 key 一个用户可能拥有多个角色
+        List<String> roleKeys = sysRoleMapper.getSysRoleKeyByUserName(username, deptId);
+
+        // 用户信息同步
+        boolean syncUserResult = syncUser(username, password, deptId.toString(), String.join(",", roleKeys));
+        // 角色权限同步
+        boolean syncRolePermissionResult = syncRolePermission(roleKeys);
+        // 部门权限同步
+        boolean syncDeptPermissionResult = syncDeptPermission(deptId);
+        // 用户角色同步
+        boolean syncRoleResult = syncRole(username, deptId);
+        // 用户部门同步
+        boolean syncDeptResult = syncDept(sysDept);
+
+        return syncUserResult && syncRolePermissionResult && syncDeptPermissionResult && syncRoleResult && syncDeptResult;
+
+    }
+
+    /**
+     * 同步用户信息
+     *
+     * @param password        用户明文密码
+     * @param username        用户名
+     * @param selectedDeparts 所属部门id，多个用半角逗号隔开
+     * @param selectedRoles   所属角色id，多个用半角逗号隔开
+     */
+    public boolean syncUser(String username, String password, String selectedDeparts, String selectedRoles) {
+        SysSyncUser sysSyncUser = new SysSyncUser();
+        String nickName = sysUserMapper.getUserNickName(username);
+        sysSyncUser.setUsername(username);
+        sysSyncUser.setRealname(nickName);
+        sysSyncUser.setPassword(password);
+        sysSyncUser.setSelecteddeparts(selectedDeparts);
+        sysSyncUser.setSelectedroles(selectedRoles);
+
+        List<SysSyncUser> sysSyncUsers = new ArrayList<>();
+        sysSyncUsers.add(sysSyncUser);
+
+        String url = "http://10.52.6.64:80/app/push/user";
+        String result = HttpUtils.sendPost(url, sysSyncUsers);
+        return result.contains("\"success\":true");
+    }
+
+    /**
+     * 同步案例库角色权限
+     */
+    public boolean syncRolePermission(List<String> roleKeys) {
+        List<SysSyncRolePermission> sysSyncRolePermissions = new ArrayList<>();
+        SysSyncRolePermission sysSyncRolePermission = new SysSyncRolePermission();
+        for (String roleKey : roleKeys) {
+            List<String> permissions = roleKey.equals("superAdmin")
+                    ? sysMenuMapper.getAllRoleMenuPre()
+                    : sysMenuMapper.getRoleMenuPre(roleKey);
+            sysSyncRolePermission.setPermissionIds(String.join(",", permissions));
+            sysSyncRolePermission.setRoleId(roleKey);
+            sysSyncRolePermissions.add(sysSyncRolePermission);
+        }
+        String url = "http://10.52.6.64:80/app/push/rolepermiss";
+        String result = HttpUtils.sendPost(url, sysSyncRolePermissions);
+        return result.contains("\"success\":true");
+    }
+
+    /**
+     * 同步部门权限
+     * 一个用户只能有一个部门
+     */
+    public boolean syncDeptPermission(Long deptId) {
+        SysSyncDeptPermission sysSyncDeptPermission = new SysSyncDeptPermission();
+        List<String> permissions = sysMenuMapper.getDeptMenuPre(deptId);
+        sysSyncDeptPermission.setDepartId(deptId.toString());
+        sysSyncDeptPermission.setPermissionIds(String.join(",", permissions));
+
+        List<SysSyncDeptPermission> sysSyncDeptPermissions = new ArrayList<>();
+        sysSyncDeptPermissions.add(sysSyncDeptPermission);
+
+        String url = "http://10.52.6.64:80/app/push/departpermiss";
+        String result = HttpUtils.sendPost(url, sysSyncDeptPermissions);
+        return result.contains("\"success\":true");
+    }
+
+    /**
+     * 同步角色
+     * 一个用户有多个角色
+     */
+    public boolean syncRole(String username, Long deptId) {
+        List<SysSyncRole> sysSyncRoles = sysRoleMapper.getSysRoleByUserName(username, deptId);
+        String url = "http://10.52.6.64:80/app/push/role";
+        String result = HttpUtils.sendPost(url, sysSyncRoles);
+        return result.contains("\"success\":true");
+    }
+
+    /**
+     * 同步部门
+     * 先要同步上级部门
+     * 祖级列表中处理 0 的都要先同步
+     */
+    public boolean syncDept(SysDept sysDept) {
+        List<SysSyncDept> sysSyncDepts = new ArrayList<>();
+        String ancestors = sysDept.getAncestors();
+
+        if (ancestors != null) {
+            String[] ancestorsList = ancestors.split(",");
+            for (String deptId : ancestorsList) {
+                if (!deptId.equals("0")) {
+                    SysDept sysDeptParent = sysDeptMapper.selectDeptById(Long.valueOf(deptId));
+                    if (sysDeptParent != null) {
+                        sysSyncDepts.add(createSyncDept(sysDeptParent));
+                    }
+                }
+            }
+        }
+
+        sysSyncDepts.add(createSyncDept(sysDept));
+
+        String url = "http://10.52.6.64:80/app/push/depart";
+        String result = HttpUtils.sendPost(url, sysSyncDepts);
+        return result.contains("\"success\":true");
+    }
+
+    private SysSyncDept createSyncDept(SysDept sysDept) {
+        SysSyncDept sysSyncDept = new SysSyncDept();
+        sysSyncDept.setId(sysDept.getDeptId().toString());
+        sysSyncDept.setParentId(sysDept.getParentId().toString().equals("0") ? null : sysDept.getParentId().toString());
+        sysSyncDept.setDepartName(sysDept.getDeptName());
+        sysSyncDept.setDepartOrder(sysDept.getOrderNum());
+        return sysSyncDept;
     }
 
 }

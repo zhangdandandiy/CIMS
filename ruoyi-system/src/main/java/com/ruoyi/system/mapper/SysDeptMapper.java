@@ -126,4 +126,12 @@ public interface SysDeptMapper {
      */
     public Long getDeptId(String deptCode);
 
+    /**
+     * 根据部门编号查询部门信息
+     *
+     * @param deptCode
+     * @return
+     */
+    public SysDept getSysDept(String deptCode);
+
 }

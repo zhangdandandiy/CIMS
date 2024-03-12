@@ -29,6 +29,11 @@ public class SysMenu extends BaseEntity {
     private String menuName;
 
     /**
+     * 案例库对应权限 code
+     */
+    private String txRemark;
+
+    /**
      * 父菜单名称
      */
     private String parentName;
@@ -233,6 +238,14 @@ public class SysMenu extends BaseEntity {
         this.children = children;
     }
 
+    public String getTxRemark() {
+        return txRemark;
+    }
+
+    public void setTxRemark(String txRemark) {
+        this.txRemark = txRemark;
+    }
+
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE)
@@ -254,6 +267,7 @@ public class SysMenu extends BaseEntity {
                 .append("updateBy", getUpdateBy())
                 .append("updateTime", getUpdateTime())
                 .append("remark", getRemark())
+                .append("txRemark", getTxRemark())
                 .toString();
     }
 }

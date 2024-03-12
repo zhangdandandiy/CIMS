@@ -224,5 +224,10 @@
         where dept_code = #{deptCode}
     </select>
 
+    <select id="getSysDept" parameterType="String" resultMap="SysDeptResult">
+        select *
+        from sys_dept
+        where dept_code = #{deptCode}
+    </select>
 
 </mapper>
