@@ -103,16 +103,6 @@ public class MatSysDetailController extends BaseController {
     @Log(title = "备品详细信息", businessType = BusinessType.UPDATE)
     @PutMapping("/edit")
     public AjaxResult edit(@Validated @RequestBody MatSysDetail matSysDetail) {
-        MatSysDetailSearchListDto matSearchSysDetail = new MatSysDetailSearchListDto();
-        matSearchSysDetail.setMatCode(matSysDetail.getMatCode());
-        matSearchSysDetail.setUserId(getUserId());
-
-        MatSysDetail matSysDetailInfo = matSysDetailMapper.checkMatCodeUnique(matSearchSysDetail);
-
-        if (!matSysDetailService.checkMatCodeUnique(matSearchSysDetail) && matSysDetail.getMatId() == matSysDetailInfo.getMatId()) {
-            return error("修改料号'" + matSysDetail.getMatCode() + "'失败，料号已存在");
-        }
-        matSysDetail.setUpdateBy(getUsername());
         return toAjax(matSysDetailService.updateMatSysDetail(matSysDetail));
     }
 

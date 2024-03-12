@@ -3,6 +3,7 @@ package com.ruoyi.mat.mapper;
 import com.ruoyi.mat.domain.MatSysDetail;
 import com.ruoyi.mat.domain.dto.MatSysDetailSearchInfoDto;
 import com.ruoyi.mat.domain.dto.MatSysDetailSearchListDto;
+import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
 
@@ -12,6 +13,7 @@ import java.util.List;
  * @author Dandan
  * @date 2023/8/21 8:57
  **/
+@Mapper
 public interface MatSysDetailMapper {
 
     /**
