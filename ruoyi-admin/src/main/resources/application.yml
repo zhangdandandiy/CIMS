@@ -50,6 +50,12 @@ user:
 
 # Spring配置
 spring:
+  # 指定编码格式
+  http:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
   # 资源信息
   messages:
     # 国际化资源文件路径

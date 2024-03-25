@@ -2,6 +2,7 @@ package com.ruoyi.system.service;
 
 import com.ruoyi.common.core.domain.TreeSelect;
 import com.ruoyi.common.core.domain.entity.SysDept;
+import com.ruoyi.system.domain.SysSyncDept;
 
 import java.util.List;
 
@@ -11,6 +12,14 @@ import java.util.List;
  * @author Dandan
  */
 public interface ISysDeptService {
+
+    /**
+     * 案例库系统部门同步
+     *
+     * @return
+     */
+    public List<SysSyncDept> selectSyncDeptList();
+
     /**
      * 查询部门管理数据
      *

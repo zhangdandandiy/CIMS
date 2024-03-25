@@ -31,6 +31,16 @@ public class SysDeptController extends BaseController {
     private ISysDeptService deptService;
 
     /**
+     * 案例库部门同步
+     */
+    @ApiOperation("案例库部门同步")
+    @GetMapping("/tx_list")
+    public AjaxResult txList() {
+        return success(deptService.selectSyncDeptList());
+    }
+
+
+    /**
      * 获取部门列表
      */
     @ApiOperation("获取部门列表")

@@ -12,6 +12,7 @@ import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.spring.SpringUtils;
 import com.ruoyi.system.domain.SysDeptRole;
+import com.ruoyi.system.domain.SysSyncDept;
 import com.ruoyi.system.mapper.SysDeptMapper;
 import com.ruoyi.system.mapper.SysDeptRoleMapper;
 import com.ruoyi.system.mapper.SysRoleMapper;
@@ -40,6 +41,16 @@ public class SysDeptServiceImpl implements ISysDeptService {
 
     @Autowired
     private SysDeptRoleMapper sysDeptRoleMapper;
+
+    /**
+     * 案例库系统部门同步
+     *
+     * @return
+     */
+    @Override
+    public List<SysSyncDept> selectSyncDeptList(){
+        return deptMapper.selectSyncDeptList();
+    }
 
     /**
      * 查询部门管理数据

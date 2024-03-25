@@ -110,7 +110,7 @@ public class SysLoginService {
             UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(username, password);
             // 调用身份验证流程
             AuthenticationContextHolder.setContext(authenticationToken);
-            // 该方法会去调用UserDetailsServiceImpl.loadUserByUsername
+            // 该方法会去调用 UserDetailsServiceImpl.loadUserByUsername
             authentication = authenticationManager.authenticate(authenticationToken);
         } catch (Exception e) {
             if (e instanceof BadCredentialsException) {
@@ -183,7 +183,7 @@ public class SysLoginService {
             if (!isSuccess) {
                 throw new UserPasswordNotMatchException();
             } else { // 用户名和密码一定是正确的
-                // 1、先查有没有这个用户
+                // 先查有没有这个用户
                 SysUser user = sysUserMapper.selectUserByUserName(username);
                 if (user != null) {
                     // 有这个用户，校验密码
@@ -225,28 +225,6 @@ public class SysLoginService {
             throw new UserInfoNoSyncException();
         }
 
-//        if (password.length() < UserConstants.PASSWORD_MIN_LENGTH
-//                || password.length() > UserConstants.PASSWORD_MAX_LENGTH) {
-//            AsyncManager.me().execute(AsyncFactory.recordLogininfor(username, Constants.LOGIN_FAIL, MessageUtils.message("user.password.not.match")));
-//            throw new UserPasswordNotMatchException();
-//        }
-        // 用户名或密码为空 错误
-//        if (StringUtils.isEmpty(username) || StringUtils.isEmpty(password)) {
-//            AsyncManager.me().execute(AsyncFactory.recordLogininfor(username, Constants.LOGIN_FAIL, MessageUtils.message("not.null")));
-//            throw new UserNotExistsException();
-//        }
-//        // 用户名不在指定范围内 错误
-//        if (username.length() < UserConstants.USERNAME_MIN_LENGTH
-//                || username.length() > UserConstants.USERNAME_MAX_LENGTH) {
-//            AsyncManager.me().execute(AsyncFactory.recordLogininfor(username, Constants.LOGIN_FAIL, MessageUtils.message("user.password.not.match")));
-//            throw new UserPasswordNotMatchException();
-//        }
-//        // IP黑名单校验
-//        String blackStr = configService.selectConfigByKey("sys.login.blackIPList");
-//        if (IpUtils.isMatchedIp(blackStr, IpUtils.getIpAddr())) {
-//            AsyncManager.me().execute(AsyncFactory.recordLogininfor(username, Constants.LOGIN_FAIL, MessageUtils.message("login.blocked")));
-//            throw new BlackListException();
-//        }
     }
 
     /**
@@ -326,7 +304,7 @@ public class SysLoginService {
         List<SysSyncUser> sysSyncUsers = new ArrayList<>();
         sysSyncUsers.add(sysSyncUser);
 
-        String url = "http://10.52.6.64:80/app/push/user";
+        String url = "http://10.52.6.61:80/app/push/user";
         String result = HttpUtils.sendPost(url, sysSyncUsers);
         return result.contains("\"success\":true");
     }
@@ -345,7 +323,7 @@ public class SysLoginService {
             sysSyncRolePermission.setRoleId(roleKey);
             sysSyncRolePermissions.add(sysSyncRolePermission);
         }
-        String url = "http://10.52.6.64:80/app/push/rolepermiss";
+        String url = "http://10.52.6.61:80/app/push/rolepermiss";
         String result = HttpUtils.sendPost(url, sysSyncRolePermissions);
         return result.contains("\"success\":true");
     }
@@ -363,7 +341,7 @@ public class SysLoginService {
         List<SysSyncDeptPermission> sysSyncDeptPermissions = new ArrayList<>();
         sysSyncDeptPermissions.add(sysSyncDeptPermission);
 
-        String url = "http://10.52.6.64:80/app/push/departpermiss";
+        String url = "http://10.52.6.61:80/app/push/departpermiss";
         String result = HttpUtils.sendPost(url, sysSyncDeptPermissions);
         return result.contains("\"success\":true");
     }
@@ -374,7 +352,7 @@ public class SysLoginService {
      */
     public boolean syncRole(String username, Long deptId) {
         List<SysSyncRole> sysSyncRoles = sysRoleMapper.getSysRoleByUserName(username, deptId);
-        String url = "http://10.52.6.64:80/app/push/role";
+        String url = "http://10.52.6.61:80/app/push/role";
         String result = HttpUtils.sendPost(url, sysSyncRoles);
         return result.contains("\"success\":true");
     }
@@ -402,7 +380,7 @@ public class SysLoginService {
 
         sysSyncDepts.add(createSyncDept(sysDept));
 
-        String url = "http://10.52.6.64:80/app/push/depart";
+        String url = "http://10.52.6.61:80/app/push/depart";
         String result = HttpUtils.sendPost(url, sysSyncDepts);
         return result.contains("\"success\":true");
     }

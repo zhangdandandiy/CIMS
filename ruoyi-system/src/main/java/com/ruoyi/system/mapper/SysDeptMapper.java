@@ -1,6 +1,7 @@
 package com.ruoyi.system.mapper;
 
 import com.ruoyi.common.core.domain.entity.SysDept;
+import com.ruoyi.system.domain.SysSyncDept;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -13,6 +14,14 @@ import java.util.List;
  */
 @Mapper
 public interface SysDeptMapper {
+
+    /**
+     * 案例库系统部门同步
+     *
+     * @return
+     */
+    public List<SysSyncDept> selectSyncDeptList();
+
     /**
      * 查询部门管理数据
      *
