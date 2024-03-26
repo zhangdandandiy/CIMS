@@ -119,6 +119,17 @@
         </trim>
     </insert>
 
+    <update id="updateMatSysInput" parameterType="MatSysInput">
+        update mat_sys_input
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="matCode != null">mat_code = #{matCode},</if>
+            <if test="matInputNumber != null">mat_input_number = #{matInputNumber},</if>
+            <if test="matInputTime != null">mat_input_time = #{matInputTime},</if>
+            <if test="matInputUser != null">mat_input_user = #{matInputUser},</if>
+        </trim>
+        where mat_input_id = #{matInputId}
+    </update>
+
     <!-- 根据Id删除备品入库信息 -->
     <delete id="deleteMatSysInputByMatInputId" parameterType="Long">
         delete

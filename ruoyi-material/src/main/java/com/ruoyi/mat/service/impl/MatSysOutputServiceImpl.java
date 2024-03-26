@@ -3,16 +3,14 @@ package com.ruoyi.mat.service.impl;
 import com.ruoyi.common.core.domain.entity.SysUser;
 import com.ruoyi.mat.domain.MatSysDetail;
 import com.ruoyi.mat.domain.MatSysOutput;
-import com.ruoyi.mat.domain.dto.MatSysDetailSearchInfoDto;
-import com.ruoyi.mat.domain.dto.MatSysOutputSearchInfoDto;
-import com.ruoyi.mat.domain.dto.MatSysOutputSearchListDto;
-import com.ruoyi.mat.domain.dto.MatSysOutputTotalInfoDto;
+import com.ruoyi.mat.domain.dto.*;
 import com.ruoyi.mat.mapper.MatSysDetailMapper;
 import com.ruoyi.mat.mapper.MatSysOutputMapper;
 import com.ruoyi.mat.service.IMatSysOutputService;
 import com.ruoyi.system.mapper.SysUserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -62,8 +60,8 @@ public class MatSysOutputServiceImpl implements IMatSysOutputService {
      * @return 备品出库信息集合
      */
     @Override
-    public List<MatSysOutputTotalInfoDto> selectMatSysOutputTotalList(MatSysOutputSearchListDto matSysOutput){
-        return  matSysOutputMapper.selectMatSysOutputTotalList(matSysOutput);
+    public List<MatSysOutputTotalInfoDto> selectMatSysOutputTotalList(MatSysOutputSearchListDto matSysOutput) {
+        return matSysOutputMapper.selectMatSysOutputTotalList(matSysOutput);
     }
 
     /**
@@ -72,6 +70,7 @@ public class MatSysOutputServiceImpl implements IMatSysOutputService {
      * @param matSysOutput 备品出库信息
      * @return 结果
      */
+    @Transactional
     @Override
     public int insertMatSysOutput(MatSysOutput matSysOutput) {
         // 获取出库数量
@@ -102,4 +101,34 @@ public class MatSysOutputServiceImpl implements IMatSysOutputService {
     public int deleteMatSysOutputByMatOutputIds(Long[] matOutputIds) {
         return 0;
     }
+
+    /**
+     * 修改备品出库信息
+     *
+     * @param matSysOutput 备品出库信息
+     * @return
+     */
+    @Transactional
+    @Override
+    public int editMatSysOutput(MatSysOutputEditDto matSysOutput) {
+        // 获取出库备品编号
+        String matCode = matSysOutput.getMatCode();
+        // 获取用户名
+        String userName = matSysOutput.getMatOutputUser();
+        // 查询备品信息
+        MatSysDetail matSysDetail = matSysDetailMapper.selectMatSysDetail(matCode, userName);
+
+        // 修改备品出库信息数量
+        // 目前备品数量 + 修改前备品出库数量 - 修改后备品出库数量
+        Long currentCount = matSysDetail.getMatNumber();
+        Long beforeCount = matSysOutput.getMatOutputNumber();
+        Long afterCount = matSysOutput.getMatOutputNumberEdit();
+        matSysDetail.setMatNumber(currentCount + beforeCount - afterCount);
+        matSysDetail.setUpdateBy(userName);
+        matSysDetailMapper.updateMatSysDetail(matSysDetail);
+
+        // 修改备品出库信息
+        return matSysOutputMapper.updateMatSysOutput(matSysOutput);
+    }
+
 }

@@ -266,4 +266,14 @@
         where u.user_id = #{userId}
     </select>
 
+    <select id="selectMatSysDetail" parameterType="String" resultMap="MatSysDetailResult">
+        select top(1) *
+        from mat_sys_detail d
+                 left join mat_sys_floor f on f.floor_code = d.mat_floor_code
+                 left join mat_sys_user_floor uf on uf.floor_id = f.floor_id
+                 left join sys_user u on u.user_id = uf.user_id
+        where u.user_name = #{userName}
+          and d.mat_code = #{matCode}
+    </select>
+
 </mapper>

@@ -1,6 +1,7 @@
 package com.ruoyi.mat.service;
 
 import com.ruoyi.mat.domain.MatSysInput;
+import com.ruoyi.mat.domain.dto.MatSysInputEditDto;
 import com.ruoyi.mat.domain.dto.MatSysInputSearchInfoDto;
 import com.ruoyi.mat.domain.dto.MatSysInputSearchListDto;
 import com.ruoyi.mat.domain.dto.MatSysInputTotalInfoDto;
@@ -62,5 +63,13 @@ public interface IMatSysInputService {
      * @return 结果
      */
     public int deleteMatSysInputByMatInputId(Long matInputId);
+
+    /**
+     * 修改备品入库信息
+     *
+     * @param matSysInput 备品入库信息
+     * @return
+     */
+    public int editMatSysInput(MatSysInputEditDto matSysInput);
 
 }

@@ -1,6 +1,7 @@
 package com.ruoyi.mat.service;
 
 import com.ruoyi.mat.domain.MatSysOutput;
+import com.ruoyi.mat.domain.dto.MatSysOutputEditDto;
 import com.ruoyi.mat.domain.dto.MatSysOutputSearchInfoDto;
 import com.ruoyi.mat.domain.dto.MatSysOutputSearchListDto;
 import com.ruoyi.mat.domain.dto.MatSysOutputTotalInfoDto;
@@ -54,5 +55,13 @@ public interface IMatSysOutputService {
      * @return 结果
      */
     public int deleteMatSysOutputByMatOutputIds(Long[] matOutputIds);
+
+    /**
+     * 修改备品出库信息
+     *
+     * @param matSysOutput 备品出库信息
+     * @return
+     */
+    public int editMatSysOutput(MatSysOutputEditDto matSysOutput);
 
 }

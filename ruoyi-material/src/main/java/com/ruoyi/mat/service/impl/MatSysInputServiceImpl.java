@@ -3,10 +3,7 @@ package com.ruoyi.mat.service.impl;
 import com.ruoyi.common.core.domain.entity.SysUser;
 import com.ruoyi.mat.domain.MatSysDetail;
 import com.ruoyi.mat.domain.MatSysInput;
-import com.ruoyi.mat.domain.dto.MatSysDetailSearchInfoDto;
-import com.ruoyi.mat.domain.dto.MatSysInputSearchInfoDto;
-import com.ruoyi.mat.domain.dto.MatSysInputSearchListDto;
-import com.ruoyi.mat.domain.dto.MatSysInputTotalInfoDto;
+import com.ruoyi.mat.domain.dto.*;
 import com.ruoyi.mat.mapper.MatSysDetailMapper;
 import com.ruoyi.mat.mapper.MatSysInputMapper;
 import com.ruoyi.mat.service.IMatSysInputService;
@@ -63,7 +60,7 @@ public class MatSysInputServiceImpl implements IMatSysInputService {
      * @return 备品入库信息集合
      */
     @Override
-    public List<MatSysInputTotalInfoDto> selectMatSysInputTotalList(MatSysInputSearchListDto matSysInput){
+    public List<MatSysInputTotalInfoDto> selectMatSysInputTotalList(MatSysInputSearchListDto matSysInput) {
         return matSysInputMapper.selectMatSysInputTotalList(matSysInput);
     }
 
@@ -120,6 +117,35 @@ public class MatSysInputServiceImpl implements IMatSysInputService {
     @Override
     public int deleteMatSysInputByMatInputId(Long matInputId) {
         return matSysInputMapper.deleteMatSysInputByMatInputId(matInputId);
+    }
+
+    /**
+     * 修改备品入库信息
+     *
+     * @param matSysInput 备品入库信息
+     * @return
+     */
+    @Transactional
+    @Override
+    public int editMatSysInput(MatSysInputEditDto matSysInput) {
+        // 获取入库备品编号
+        String matCode = matSysInput.getMatCode();
+        // 获取用户名
+        String userName = matSysInput.getMatInputUser();
+        // 查询备品信息
+        MatSysDetail matSysDetail = matSysDetailMapper.selectMatSysDetail(matCode, userName);
+
+        // 修改备品入库信息数量
+        // 目前备品数量 - 修改前备品入库数量 + 修改后备品出库数量
+        Long currentCount = matSysDetail.getMatNumber();
+        Long beforeCount = matSysInput.getMatInputNumber();
+        Long afterCount = matSysInput.getMatInputNumberEdit();
+        matSysDetail.setMatNumber(currentCount - beforeCount + afterCount);
+        matSysDetail.setUpdateBy(userName);
+        matSysDetailMapper.updateMatSysDetail(matSysDetail);
+
+        // 修改备品入库信息
+        return matSysInputMapper.updateMatSysInput(matSysInput);
     }
 
 }

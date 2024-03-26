@@ -133,6 +133,19 @@
         </trim>
     </insert>
 
+    <update id="updateMatSysOutput" parameterType="MatSysOutput">
+        update mat_sys_output
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="matCode != null">mat_code = #{matCode},</if>
+            <if test="matOutputNumber != null">mat_output_number = #{matOutputNumber},</if>
+            <if test="matReceiveDeptId != null">mat_receive_dept_id = #{matReceiveDeptId},</if>
+            <if test="matReceiveUser != null">mat_receive_user = #{matReceiveUser},</if>
+            <if test="matOutputTime != null">mat_output_time = #{matOutputTime},</if>
+            <if test="matOutputUser != null">mat_output_user = #{matOutputUser},</if>
+        </trim>
+        where mat_output_id = #{matOutputId}
+    </update>
+
     <delete id="deleteMatSysOutputByMatOutputId" parameterType="Long">
         delete
         from mat_sys_output

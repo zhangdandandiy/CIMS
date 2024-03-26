@@ -4,6 +4,7 @@ import com.ruoyi.mat.domain.MatSysDetail;
 import com.ruoyi.mat.domain.dto.MatSysDetailSearchInfoDto;
 import com.ruoyi.mat.domain.dto.MatSysDetailSearchListDto;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -109,5 +110,14 @@ public interface MatSysDetailMapper {
      * @return
      */
     public List<String> selectAllMatProjectByUserId(Long userId);
+
+    /**
+     * 根据料号和用户名查询备品信息
+     *
+     * @param matCode
+     * @param userName
+     * @return
+     */
+    public MatSysDetail selectMatSysDetail(@Param("matCode") String matCode, @Param("userName") String userName);
 
 }

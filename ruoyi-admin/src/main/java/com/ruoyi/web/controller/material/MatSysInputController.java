@@ -7,9 +7,7 @@ import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.utils.poi.ExcelUtil;
 import com.ruoyi.mat.domain.MatSysInput;
-import com.ruoyi.mat.domain.dto.MatSysInputSearchInfoDto;
-import com.ruoyi.mat.domain.dto.MatSysInputSearchListDto;
-import com.ruoyi.mat.domain.dto.MatSysInputTotalInfoDto;
+import com.ruoyi.mat.domain.dto.*;
 import com.ruoyi.mat.service.IMatSysInputService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -33,6 +31,14 @@ public class MatSysInputController extends BaseController {
 
     @Autowired
     private IMatSysInputService matSysInputService;
+
+    @ApiOperation("修改备品出库信息")
+    @PostMapping("/edit")
+    public AjaxResult editMatSysInput(@RequestBody MatSysInputEditDto matSysInputEditDto) {
+        matSysInputEditDto.setMatInputUser(getUsername());
+        matSysInputService.editMatSysInput(matSysInputEditDto);
+        return success();
+    }
 
     @ApiOperation("查询备品入库信息列表")
     @GetMapping("/list")

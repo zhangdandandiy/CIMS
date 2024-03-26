@@ -2,6 +2,7 @@ package com.ruoyi.mat.mapper;
 
 import com.ruoyi.mat.domain.MatSysInput;
 import com.ruoyi.mat.domain.dto.*;
+import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
 
@@ -11,6 +12,8 @@ import java.util.List;
  * @author Dandan
  * @date 2023/8/21 11:27
  **/
+
+@Mapper
 public interface MatSysInputMapper {
 
     /**
@@ -44,6 +47,14 @@ public interface MatSysInputMapper {
      * @return 结果
      */
     public int insertMatSysInput(MatSysInput matSysInput);
+
+    /**
+     * 修改备品入库信息
+     *
+     * @param matSysInput 备品入库信息
+     * @return 结果
+     */
+    public int updateMatSysInput(MatSysInput matSysInput);
 
     /**
      * 根据Id删除备品入库信息

@@ -8,10 +8,7 @@ import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.utils.poi.ExcelUtil;
 import com.ruoyi.mat.domain.MatSysDetail;
 import com.ruoyi.mat.domain.MatSysOutput;
-import com.ruoyi.mat.domain.dto.MatSysDetailSearchInfoDto;
-import com.ruoyi.mat.domain.dto.MatSysOutputSearchInfoDto;
-import com.ruoyi.mat.domain.dto.MatSysOutputSearchListDto;
-import com.ruoyi.mat.domain.dto.MatSysOutputTotalInfoDto;
+import com.ruoyi.mat.domain.dto.*;
 import com.ruoyi.mat.service.IMatSysDetailService;
 import com.ruoyi.mat.service.IMatSysOutputService;
 import io.swagger.annotations.Api;
@@ -39,6 +36,14 @@ public class MatSysOutputController extends BaseController {
 
     @Autowired
     private IMatSysDetailService matSysDetailService;
+
+    @ApiOperation("修改备品出库信息")
+    @PostMapping("/edit")
+    public AjaxResult editMatSysOutput(@RequestBody MatSysOutputEditDto matSysOutputEditDto) {
+        matSysOutputEditDto.setMatOutputUser(getUsername());
+        matSysOutputService.editMatSysOutput(matSysOutputEditDto);
+        return success();
+    }
 
     @ApiOperation("查询备品出库信息列表")
     @GetMapping("/list")

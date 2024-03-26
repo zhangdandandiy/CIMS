@@ -4,6 +4,7 @@ import com.ruoyi.mat.domain.MatSysOutput;
 import com.ruoyi.mat.domain.dto.MatSysOutputSearchInfoDto;
 import com.ruoyi.mat.domain.dto.MatSysOutputSearchListDto;
 import com.ruoyi.mat.domain.dto.MatSysOutputTotalInfoDto;
+import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
 
@@ -13,6 +14,8 @@ import java.util.List;
  * @author Dandan
  * @date 2023/8/21 19:45
  **/
+
+@Mapper
 public interface MatSysOutputMapper {
 
     /**
@@ -46,6 +49,14 @@ public interface MatSysOutputMapper {
      * @return 结果
      */
     public int insertMatSysOutput(MatSysOutput matSysOutput);
+
+    /**
+     * 更新备品出库信息
+     *
+     * @param matSysOutput
+     * @return
+     */
+    public int updateMatSysOutput(MatSysOutput matSysOutput);
 
     /**
      * 删除备品出库信息
