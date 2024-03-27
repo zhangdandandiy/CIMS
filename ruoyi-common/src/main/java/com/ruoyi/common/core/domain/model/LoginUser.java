@@ -1,11 +1,13 @@
 package com.ruoyi.common.core.domain.model;
 
 import com.alibaba.fastjson2.annotation.JSONField;
+import com.ruoyi.common.core.domain.dto.RoleDTO;
 import com.ruoyi.common.core.domain.entity.SysUser;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -71,6 +73,45 @@ public class LoginUser implements UserDetails {
      */
     private SysUser user;
 
+    /**
+     * 用户类型
+     */
+    private String userType;
+
+    /**
+     * 用户名
+     */
+    private String nickName;
+
+    /**
+     * 角色对象
+     */
+    private List<RoleDTO> roles;
+
+    public List<RoleDTO> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(List<RoleDTO> roles) {
+        this.roles = roles;
+    }
+
+    public void setNickName(String nickName) {
+        this.nickName = nickName;
+    }
+
+    public String getNickName() {
+        return nickName;
+    }
+
+    public String getUserType() {
+        return userType;
+    }
+
+    public void setUserType(String userType) {
+        this.userType = userType;
+    }
+
     public Long getUserId() {
         return userId;
     }
@@ -108,6 +149,20 @@ public class LoginUser implements UserDetails {
         this.deptId = deptId;
         this.user = user;
         this.permissions = permissions;
+    }
+
+    /**
+     * 获取登录id
+     */
+    public String getLoginId() {
+        if (userType == null) {
+            userType = "PC";
+            // throw new IllegalArgumentException("用户类型不能为空");
+        }
+        if (userId == null) {
+            throw new IllegalArgumentException("用户ID不能为空");
+        }
+        return userType + ":" + userId;
     }
 
     @JSONField(serialize = false)

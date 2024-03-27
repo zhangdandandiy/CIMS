@@ -12,6 +12,9 @@ import java.util.*;
  * @author Dandan
  */
 public class StringUtils extends org.apache.commons.lang3.StringUtils {
+
+    public static final String SEPARATORCOMMA = ",";
+
     /**
      * 空字符串
      */
@@ -414,8 +417,7 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils {
     }
 
     /**
-     * 驼峰式命名法
-     * 例如：user_name->userName
+     * 驼峰式命名法 例如：user_name->userName
      */
     public static String toCamelCase(String s) {
         if (s == null) {

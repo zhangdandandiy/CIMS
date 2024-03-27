@@ -2,6 +2,7 @@ package com.ruoyi.system.mapper;
 
 import com.ruoyi.common.annotation.DataSource;
 import com.ruoyi.common.core.domain.entity.SysUser;
+import com.ruoyi.common.core.mapper.BaseMapperPlus;
 import com.ruoyi.common.enums.DataSourceType;
 import com.ruoyi.system.domain.SysUserBU14;
 import org.apache.ibatis.annotations.Mapper;
@@ -15,7 +16,7 @@ import java.util.List;
  * @author Dandan
  */
 @Mapper
-public interface SysUserMapper {
+public interface SysUserMapper extends BaseMapperPlus<SysUserMapper, SysUser, SysUser> {
     /**
      * 根据条件分页查询用户列表
      *

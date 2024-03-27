@@ -111,6 +111,11 @@
             <artifactId>ruoyi-mould</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>com.ruoyi</groupId>
+            <artifactId>ruoyi-flowable</artifactId>
+        </dependency>
+
         <!-- 优雅关闭应用 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

@@ -1,9 +1,13 @@
 package com.ruoyi.system.service.impl;
 
+import cn.hutool.core.util.ObjectUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.ruoyi.common.annotation.DataScope;
+import com.ruoyi.common.constant.CacheNames;
 import com.ruoyi.common.constant.UserConstants;
 import com.ruoyi.common.core.domain.entity.SysRole;
 import com.ruoyi.common.core.domain.entity.SysUser;
+import com.ruoyi.common.core.service.UserService;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.common.utils.StringUtils;
@@ -19,6 +23,7 @@ import com.ruoyi.system.service.ISysUserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -34,7 +39,7 @@ import java.util.stream.Collectors;
  * @author Dandan
  */
 @Service
-public class SysUserServiceImpl implements ISysUserService {
+public class SysUserServiceImpl implements ISysUserService, UserService {
     private static final Logger log = LoggerFactory.getLogger(SysUserServiceImpl.class);
 
     @Autowired
@@ -508,8 +513,24 @@ public class SysUserServiceImpl implements ISysUserService {
      * @return
      */
     @Override
-    public List<SysUser> getUserByDeptId(Long deptId){
+    public List<SysUser> getUserByDeptId(Long deptId) {
         return userMapper.getUserByDeptId(deptId);
+    }
+
+    @Cacheable(cacheNames = CacheNames.SYS_USER_NAME, key = "#userId")
+    @Override
+    public String selectUserNameById(Long userId) {
+        SysUser sysUser = userMapper.selectOne(new LambdaQueryWrapper<SysUser>()
+                .select(SysUser::getUserName).eq(SysUser::getUserId, userId));
+        return ObjectUtil.isNull(sysUser) ? null : sysUser.getUserName();
+    }
+
+    @Cacheable(cacheNames = CacheNames.SYS_NICK_NAME, key = "#userId")
+    @Override
+    public String selectNickNameById(Long userId) {
+        SysUser sysUser = userMapper.selectOne(new LambdaQueryWrapper<SysUser>()
+                .select(SysUser::getNickName).eq(SysUser::getUserId, userId));
+        return ObjectUtil.isNull(sysUser) ? null : sysUser.getNickName();
     }
 
 }
