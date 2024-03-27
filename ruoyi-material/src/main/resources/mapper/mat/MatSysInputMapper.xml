@@ -119,11 +119,11 @@
         </trim>
     </insert>
 
-    <update id="updateMatSysInput" parameterType="MatSysInput">
+    <update id="updateMatSysInput" parameterType="MatSysInputEditDto">
         update mat_sys_input
         <trim prefix="SET" suffixOverrides=",">
             <if test="matCode != null">mat_code = #{matCode},</if>
-            <if test="matInputNumber != null">mat_input_number = #{matInputNumber},</if>
+            <if test="matInputNumber != null">mat_input_number = #{matInputNumberEditd},</if>
             <if test="matInputTime != null">mat_input_time = #{matInputTime},</if>
             <if test="matInputUser != null">mat_input_user = #{matInputUser},</if>
         </trim>

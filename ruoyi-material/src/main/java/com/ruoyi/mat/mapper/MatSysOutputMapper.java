@@ -1,6 +1,7 @@
 package com.ruoyi.mat.mapper;
 
 import com.ruoyi.mat.domain.MatSysOutput;
+import com.ruoyi.mat.domain.dto.MatSysOutputEditDto;
 import com.ruoyi.mat.domain.dto.MatSysOutputSearchInfoDto;
 import com.ruoyi.mat.domain.dto.MatSysOutputSearchListDto;
 import com.ruoyi.mat.domain.dto.MatSysOutputTotalInfoDto;
@@ -56,7 +57,7 @@ public interface MatSysOutputMapper {
      * @param matSysOutput
      * @return
      */
-    public int updateMatSysOutput(MatSysOutput matSysOutput);
+    public int updateMatSysOutput(MatSysOutputEditDto matSysOutput);
 
     /**
      * 删除备品出库信息

@@ -133,11 +133,11 @@
         </trim>
     </insert>
 
-    <update id="updateMatSysOutput" parameterType="MatSysOutput">
+    <update id="updateMatSysOutput" parameterType="MatSysOutputEditDto">
         update mat_sys_output
         <trim prefix="SET" suffixOverrides=",">
             <if test="matCode != null">mat_code = #{matCode},</if>
-            <if test="matOutputNumber != null">mat_output_number = #{matOutputNumber},</if>
+            <if test="matOutputNumber != null">mat_output_number = #{matOutputNumberEdit},</if>
             <if test="matReceiveDeptId != null">mat_receive_dept_id = #{matReceiveDeptId},</if>
             <if test="matReceiveUser != null">mat_receive_user = #{matReceiveUser},</if>
             <if test="matOutputTime != null">mat_output_time = #{matOutputTime},</if>

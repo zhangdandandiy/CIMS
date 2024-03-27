@@ -54,7 +54,7 @@ public interface MatSysInputMapper {
      * @param matSysInput 备品入库信息
      * @return 结果
      */
-    public int updateMatSysInput(MatSysInput matSysInput);
+    public int updateMatSysInput(MatSysInputEditDto matSysInput);
 
     /**
      * 根据Id删除备品入库信息
